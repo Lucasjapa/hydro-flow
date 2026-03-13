@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20260312-01" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_user"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_user">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_user" columnNames="id" constraintName="pk_users" />
+
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_user_id" incrementBy="1" startValue="1" />
+    </changeSet>
+
+    <changeSet id="20260312-02" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_family"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_family">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="cistern_capacity_liters" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="has_gutter_system" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="latitude" type="DECIMAL(9,6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="longitude" type="DECIMAL(9,6)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_family" columnNames="id" constraintName="pk_family" />
+
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_family_id" incrementBy="1" startValue="1" />
+    </changeSet>
+
+    <changeSet id="20260312-03" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_member"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_member">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="age" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="is_bedridden" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="id_family" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_member" columnNames="id" constraintName="pk_member" />
+
+        <!-- Foreign Key -->
+        <addForeignKeyConstraint baseTableName="hf_member" baseColumnNames="id_family"
+                referencedTableName="hf_family" referencedColumnNames="id"
+                constraintName="fk_8548311937012"/>
+
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_member_id" incrementBy="1" startValue="1" />
+    </changeSet>
+
+    <changeSet id="20260312-04" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_system_settings"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_system_settings">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="daily_water_consumption" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gutter_efficiency_coefficient" type="DECIMAL(5,3)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_system_settings" columnNames="id" constraintName="pk_system_settings" />
+
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_system_settings_id" incrementBy="1" startValue="1" />
+    </changeSet>
+
+    <changeSet id="20260312-05" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_monthly_rainfall"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_monthly_rainfall">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="year" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="month" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rainfall_mm" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_monthly_rainfall" columnNames="id" constraintName="pk_monthly_rainfall" />
+
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_monthly_rainfall_id" incrementBy="1" startValue="1" />
+    </changeSet>
+
+    <changeSet id="20260312-06" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_water_delivery"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_water_delivery">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="id_family" type="BIGINT">
+                <constraints nullable="false" />
+            </column>
+            <column name="delivery_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="water_amount_liters" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_water_delivery" columnNames="id" constraintName="pk_water_delivery" />
+
+        <!-- Foreign Key -->
+        <addForeignKeyConstraint baseTableName="hf_water_delivery" baseColumnNames="id_family"
+                referencedTableName="hf_family" referencedColumnNames="id"
+                constraintName="fk_0195593710570"/>
+
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_water_delivery_id" incrementBy="1" startValue="1" />
+    </changeSet>
+
+</databaseChangeLog>
