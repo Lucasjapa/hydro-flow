@@ -8,8 +8,6 @@ import java.math.BigDecimal;
 public class SystemSettings {
 
     @Id
-    @SequenceGenerator(name = "hf_system_settings_id", sequenceName = "hf_system_settings_id", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hf_system_settings_id")
     private Long id;
 
     @Column(name = "daily_water_consumption", nullable = false)
@@ -27,5 +25,21 @@ public class SystemSettings {
 
     public Long getId() {
         return id;
+    }
+
+    public BigDecimal getDailyWaterConsumption() {
+        return dailyWaterConsumption;
+    }
+
+    public void setDailyWaterConsumption(BigDecimal dailyWaterConsumption) {
+        this.dailyWaterConsumption = dailyWaterConsumption;
+    }
+
+    public BigDecimal getGutterEfficiencyCoefficient() {
+        return gutterEfficiencyCoefficient;
+    }
+
+    public void setGutterEfficiencyCoefficient(BigDecimal gutterEfficiencyCoefficient) {
+        this.gutterEfficiencyCoefficient = gutterEfficiencyCoefficient;
     }
 }

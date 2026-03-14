@@ -10,7 +10,7 @@
     <changeSet id="20260312-01" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_user"/>
+                <tableExists tableName="hf_user" />
             </not>
         </preConditions>
 
@@ -40,7 +40,7 @@
     <changeSet id="20260312-02" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_family"/>
+                <tableExists tableName="hf_family" />
             </not>
         </preConditions>
 
@@ -53,7 +53,7 @@
                 <constraints nullable="false" />
             </column>
             <column name="cistern_capacity_liters" type="DECIMAL(10,2)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
             <column name="has_gutter_system" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false" />
@@ -76,7 +76,7 @@
     <changeSet id="20260312-03" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_member"/>
+                <tableExists tableName="hf_member" />
             </not>
         </preConditions>
 
@@ -95,7 +95,7 @@
                 <constraints nullable="false" />
             </column>
             <column name="id_family" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
         </createTable>
 
@@ -105,7 +105,7 @@
         <!-- Foreign Key -->
         <addForeignKeyConstraint baseTableName="hf_member" baseColumnNames="id_family"
                 referencedTableName="hf_family" referencedColumnNames="id"
-                constraintName="fk_8548311937012"/>
+                constraintName="fk_8548311937012" />
 
         <!-- Sequence -->
         <createSequence sequenceName="hf_member_id" incrementBy="1" startValue="1" />
@@ -114,7 +114,7 @@
     <changeSet id="20260312-04" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_system_settings"/>
+                <tableExists tableName="hf_system_settings" />
             </not>
         </preConditions>
 
@@ -124,24 +124,36 @@
                 <constraints nullable="false" />
             </column>
             <column name="daily_water_consumption" type="DECIMAL(10,2)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
             <column name="gutter_efficiency_coefficient" type="DECIMAL(5,3)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
         </createTable>
 
         <!-- Primary Key -->
         <addPrimaryKey tableName="hf_system_settings" columnNames="id" constraintName="pk_system_settings" />
-
-        <!-- Sequence -->
-        <createSequence sequenceName="hf_system_settings_id" incrementBy="1" startValue="1" />
     </changeSet>
 
     <changeSet id="20260312-05" author="Lucas Cavalcante">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM hf_system_settings
+                WHERE id = 1
+            </sqlCheck>
+        </preConditions>
+
+        <sql>
+            INSERT INTO hf_system_settings (id, daily_water_consumption, gutter_efficiency_coefficient)
+            VALUES (1, 2.5, 0.8);
+        </sql>
+    </changeSet>
+
+    <changeSet id="20260312-06" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_monthly_rainfall"/>
+                <tableExists tableName="hf_monthly_rainfall" />
             </not>
         </preConditions>
 
@@ -151,13 +163,13 @@
                 <constraints nullable="false" />
             </column>
             <column name="year" type="INT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
             <column name="month" type="INT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
             <column name="rainfall_mm" type="DECIMAL(10,2)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
         </createTable>
 
@@ -168,10 +180,10 @@
         <createSequence sequenceName="hf_monthly_rainfall_id" incrementBy="1" startValue="1" />
     </changeSet>
 
-    <changeSet id="20260312-06" author="Lucas Cavalcante">
+    <changeSet id="20260312-07" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_water_delivery"/>
+                <tableExists tableName="hf_water_delivery" />
             </not>
         </preConditions>
 
@@ -184,10 +196,10 @@
                 <constraints nullable="false" />
             </column>
             <column name="delivery_date" type="DATE">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
             <column name="water_amount_liters" type="DECIMAL(10,2)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" />
             </column>
         </createTable>
 
@@ -197,7 +209,7 @@
         <!-- Foreign Key -->
         <addForeignKeyConstraint baseTableName="hf_water_delivery" baseColumnNames="id_family"
                 referencedTableName="hf_family" referencedColumnNames="id"
-                constraintName="fk_0195593710570"/>
+                constraintName="fk_0195593710570" />
 
         <!-- Sequence -->
         <createSequence sequenceName="hf_water_delivery_id" incrementBy="1" startValue="1" />

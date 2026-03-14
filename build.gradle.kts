@@ -46,6 +46,16 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    // Source: https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
+
+    // Source: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
+    implementation("com.fasterxml.jackson.core:jackson-core:2.21.1")
+
+    // Source: https://mvnrepository.com/artifact/tools.jackson.core/jackson-core
+    implementation("tools.jackson.core:jackson-core:3.1.0")
 
     // Source: https://mvnrepository.com/artifact/org.liquibase/liquibase-core
     implementation("org.liquibase:liquibase-core:5.0.1")
