@@ -11,8 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/system-settings")
+@RequestMapping("/hf/system-settings")
 @Tag(name = "System Settings", description = "Gerenciamento de configurações do sistema")
+@ApiResponses({
+    @ApiResponse(responseCode = "401", description = "Não autenticado"),
+    @ApiResponse(responseCode = "403", description = "Acesso negado"),
+    @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+})
 public class SystemSettingsController {
 
     private final SystemSettingsService systemSettingsService;
@@ -38,7 +43,8 @@ public class SystemSettingsController {
         @ApiResponse(responseCode = "404", description = "Configurações não encontradas"),
         @ApiResponse(responseCode = "422", description = "Dados inválidos")
     })
-    public ResponseEntity<SystemSettingsDTO> updateSystemSettings(@RequestBody @Valid SystemSettingsDTO systemSettingsDTO) {
+    public ResponseEntity<SystemSettingsDTO> updateSystemSettings(
+            @RequestBody @Valid SystemSettingsDTO systemSettingsDTO) {
         return ResponseEntity.ok(systemSettingsService.updateSystemSettings(systemSettingsDTO));
     }
 }

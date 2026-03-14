@@ -20,3 +20,5 @@ O Hydro Flow permite o gerenciamento de:
 - **Spring Security**
 - **Liquibase** para versionamento do banco de dados
 - **Docker Compose** para infraestrutura local
+
+http://localhost:8080/swagger-ui/index.html#/

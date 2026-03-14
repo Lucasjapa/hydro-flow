@@ -58,6 +58,8 @@
             <column name="has_gutter_system" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false" />
             </column>
+            <column name="gutter_area_m2" type="DECIMAL(10,2)" />
+            <column name="gutter_efficiency_coefficient" type="DECIMAL(5,3)" />
             <column name="latitude" type="DECIMAL(9,6)">
                 <constraints nullable="false" />
             </column>
@@ -71,6 +73,20 @@
 
         <!-- Sequence -->
         <createSequence sequenceName="hf_family_id" incrementBy="1" startValue="1" />
+
+        <!-- Check Constraint -->
+        <sql>
+        ALTER TABLE hf_family
+            ADD CONSTRAINT chk_gutter_system
+                CHECK (
+                    has_gutter_system = false
+                        OR (
+                        has_gutter_system = true
+                            AND gutter_area_m2 IS NOT NULL
+                            AND gutter_efficiency_coefficient IS NOT NULL
+                        )
+                    );
+        </sql>
     </changeSet>
 
     <changeSet id="20260312-03" author="Lucas Cavalcante">
@@ -126,9 +142,6 @@
             <column name="daily_water_consumption" type="DECIMAL(10,2)">
                 <constraints nullable="false" />
             </column>
-            <column name="gutter_efficiency_coefficient" type="DECIMAL(5,3)">
-                <constraints nullable="false" />
-            </column>
         </createTable>
 
         <!-- Primary Key -->
@@ -145,8 +158,8 @@
         </preConditions>
 
         <sql>
-            INSERT INTO hf_system_settings (id, daily_water_consumption, gutter_efficiency_coefficient)
-            VALUES (1, 2.5, 0.8);
+            INSERT INTO hf_system_settings (id, daily_water_consumption)
+            VALUES (1, 50);
         </sql>
     </changeSet>
 

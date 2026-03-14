@@ -13,14 +13,10 @@ public class SystemSettings {
     @Column(name = "daily_water_consumption", nullable = false)
     private BigDecimal dailyWaterConsumption;
 
-    @Column(name = "gutter_efficiency_coefficient", nullable = false)
-    private BigDecimal gutterEfficiencyCoefficient;
-
     public SystemSettings() {}
 
-    public SystemSettings(BigDecimal dailyWaterConsumption, BigDecimal gutterEfficiencyCoefficient) {
+    public SystemSettings(BigDecimal dailyWaterConsumption) {
         this.dailyWaterConsumption = dailyWaterConsumption;
-        this.gutterEfficiencyCoefficient = gutterEfficiencyCoefficient;
     }
 
     public Long getId() {
@@ -33,13 +29,5 @@ public class SystemSettings {
 
     public void setDailyWaterConsumption(BigDecimal dailyWaterConsumption) {
         this.dailyWaterConsumption = dailyWaterConsumption;
-    }
-
-    public BigDecimal getGutterEfficiencyCoefficient() {
-        return gutterEfficiencyCoefficient;
-    }
-
-    public void setGutterEfficiencyCoefficient(BigDecimal gutterEfficiencyCoefficient) {
-        this.gutterEfficiencyCoefficient = gutterEfficiencyCoefficient;
     }
 }
