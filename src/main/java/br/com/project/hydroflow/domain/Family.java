@@ -20,6 +20,9 @@ public class Family {
     @Column(name = "cistern_capacity_liters", nullable = false)
     private BigDecimal cisternCapacityLiters;
 
+    @Column(name = "cistern_current_level_liters", nullable = false)
+    private BigDecimal cisternCurrentLevelLiters;
+
     @Column(name = "has_gutter_system", nullable = false)
     private boolean hasGutterSystem;
 
@@ -39,8 +42,7 @@ public class Family {
     @JoinColumn(name = "id_family")
     private List<Member> members = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_family")
+    @OneToMany(mappedBy = "family")
     private List<WaterDelivery> waterDeliveries = new ArrayList<>();
 
     public Family() {}
@@ -48,6 +50,7 @@ public class Family {
     public Family(
             String name,
             BigDecimal cisternCapacityLiters,
+            BigDecimal cisternCurrentLevelLiters,
             boolean hasGutterSystem,
             BigDecimal gutterAreaM2,
             BigDecimal gutterEfficiencyCoefficient,
@@ -55,6 +58,7 @@ public class Family {
             BigDecimal longitude) {
         this.name = name;
         this.cisternCapacityLiters = cisternCapacityLiters;
+        this.cisternCurrentLevelLiters = cisternCurrentLevelLiters;
         this.hasGutterSystem = hasGutterSystem;
         this.gutterAreaM2 = gutterAreaM2;
         this.gutterEfficiencyCoefficient = gutterEfficiencyCoefficient;
@@ -80,6 +84,14 @@ public class Family {
 
     public void setCisternCapacityLiters(BigDecimal cisternCapacityLiters) {
         this.cisternCapacityLiters = cisternCapacityLiters;
+    }
+
+    public BigDecimal getCisternCurrentLevelLiters() {
+        return cisternCurrentLevelLiters;
+    }
+
+    public void setCisternCurrentLevelLiters(BigDecimal cisternCurrentLevelLiters) {
+        this.cisternCurrentLevelLiters = cisternCurrentLevelLiters;
     }
 
     public boolean isHasGutterSystem() {
@@ -128,5 +140,12 @@ public class Family {
 
     public List<Member> getMembers() {
         return members;
+    }
+
+    public void updateCisternLevel(BigDecimal newLevel) {
+        if (newLevel.compareTo(this.cisternCapacityLiters) > 0) {
+            throw new IllegalArgumentException("O nível atual da cisterna não pode ser maior que a capacidade total");
+        }
+        this.cisternCurrentLevelLiters = newLevel;
     }
 }

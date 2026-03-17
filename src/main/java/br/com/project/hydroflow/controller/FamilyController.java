@@ -18,7 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/hf/families")
-@Tag(name = "Family", description = "Gerenciamento de famílias")
+@Tag(name = "Família", description = "Gerenciamento de famílias")
 @ApiResponses({
     @ApiResponse(responseCode = "401", description = "Não autenticado"),
     @ApiResponse(responseCode = "403", description = "Acesso negado"),

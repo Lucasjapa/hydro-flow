@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/hf/system-settings")
-@Tag(name = "System Settings", description = "Gerenciamento de configurações do sistema")
+@Tag(name = "Configuração do Sistema", description = "Gerenciamento de configurações do sistema")
 @ApiResponses({
     @ApiResponse(responseCode = "401", description = "Não autenticado"),
     @ApiResponse(responseCode = "403", description = "Acesso negado"),

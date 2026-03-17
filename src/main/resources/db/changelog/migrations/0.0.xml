@@ -55,6 +55,9 @@
             <column name="cistern_capacity_liters" type="DECIMAL(10,2)">
                 <constraints nullable="false" />
             </column>
+            <column name="cistern_current_level_liters" type="DECIMAL(10,2)" defaultValue="0">
+                <constraints nullable="false" />
+            </column>
             <column name="has_gutter_system" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false" />
             </column>

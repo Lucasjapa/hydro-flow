@@ -2,9 +2,12 @@ package br.com.project.hydroflow.service;
 
 import br.com.project.hydroflow.domain.Family;
 import br.com.project.hydroflow.domain.Member;
+import br.com.project.hydroflow.domain.SystemSettings;
 import br.com.project.hydroflow.dto.FamilyDTO;
 import br.com.project.hydroflow.repository.FamilyRepository;
+import br.com.project.hydroflow.repository.SystemSettingsRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +21,11 @@ public class FamilyService {
     private static final Logger log = LoggerFactory.getLogger(FamilyService.class);
 
     private final FamilyRepository familyRepository;
+    private final SystemSettingsRepository systemSettingsRepository;
 
-    public FamilyService(FamilyRepository familyRepository) {
+    public FamilyService(FamilyRepository familyRepository, SystemSettingsRepository systemSettingsRepository) {
         this.familyRepository = familyRepository;
+        this.systemSettingsRepository = systemSettingsRepository;
     }
 
     public FamilyDTO saveFamily(FamilyDTO familyDTO) {
@@ -29,6 +34,7 @@ public class FamilyService {
         var family = new Family(
                 familyDTO.name(),
                 familyDTO.cisternCapacityLiters(),
+                familyDTO.cisternCurrentLevelLiters(),
                 familyDTO.hasGutterSystem(),
                 familyDTO.gutterAreaM2(),
                 familyDTO.gutterEfficiencyCoefficient(),
@@ -94,5 +100,36 @@ public class FamilyService {
         log.info("Buscando famílias por nome: '{}'", name);
 
         return familyRepository.findByNameContainingIgnoreCase(name, pageable).map(FamilyDTO::from);
+    }
+
+    public void updateAllCisternLevels() {
+        log.info("Iniciando atualização diária do nível da cisterna");
+
+        SystemSettings settings = systemSettingsRepository
+                .findById(1L)
+                .orElseThrow(() -> new EntityNotFoundException("Configurações do sistema não encontradas"));
+
+        List<Family> families = familyRepository.findAll();
+
+        families.forEach(family -> {
+            BigDecimal dailyConsumption = settings.getDailyWaterConsumption()
+                    .multiply(BigDecimal.valueOf(family.getMembers().size()));
+
+            BigDecimal newLevel = family.getCisternCurrentLevelLiters()
+                    .subtract(dailyConsumption)
+                    .max(BigDecimal.ZERO);
+
+            log.info(
+                    "Família id: {} | Membros: {} | Consumo diário: {} | Novo nível: {}",
+                    family.getId(),
+                    family.getMembers().size(),
+                    dailyConsumption,
+                    newLevel);
+
+            family.setCisternCurrentLevelLiters(newLevel);
+        });
+
+        familyRepository.saveAll(families);
+        log.info("Nível da cisterna atualizado para {} famílias", families.size());
     }
 }
