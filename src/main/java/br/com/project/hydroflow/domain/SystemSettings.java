@@ -15,10 +15,6 @@ public class SystemSettings {
 
     public SystemSettings() {}
 
-    public SystemSettings(BigDecimal dailyWaterConsumption) {
-        this.dailyWaterConsumption = dailyWaterConsumption;
-    }
-
     public Long getId() {
         return id;
     }

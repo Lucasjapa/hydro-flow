@@ -3,17 +3,21 @@ package br.com.project.hydroflow.controller;
 import br.com.project.hydroflow.dto.FamilyDTO;
 import br.com.project.hydroflow.service.FamilyService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
-@RequestMapping("/hf/family")
+@RequestMapping("/hf/families")
 @Tag(name = "Family", description = "Gerenciamento de famílias")
 @ApiResponses({
     @ApiResponse(responseCode = "401", description = "Não autenticado"),
@@ -36,14 +40,14 @@ public class FamilyController {
         @ApiResponse(responseCode = "422", description = "Erro de regra de negócio")
     })
     public ResponseEntity<FamilyDTO> createFamily(@RequestBody @Valid FamilyDTO familyDTO) {
-        FamilyDTO created = familyService.createFamily(familyDTO);
+        FamilyDTO familyCreated = familyService.saveFamily(familyDTO);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(created.id())
+                .buildAndExpand(familyCreated.id())
                 .toUri();
 
-        return ResponseEntity.created(location).body(created);
+        return ResponseEntity.created(location).body(familyCreated);
     }
 
     @PutMapping("/{id}")
@@ -56,5 +60,34 @@ public class FamilyController {
     })
     public ResponseEntity<FamilyDTO> updateFamily(@PathVariable Long id, @RequestBody @Valid FamilyDTO familyDTO) {
         return ResponseEntity.ok(familyService.updateFamily(id, familyDTO));
+    }
+
+    @Operation(summary = "Buscar família por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Família encontrada"),
+        @ApiResponse(responseCode = "404", description = "Família não encontrada", content = @Content)
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<FamilyDTO> findFamilyById(
+            @Parameter(description = "ID da família", example = "1") @PathVariable Long id) {
+        return ResponseEntity.ok(familyService.findFamilyById(id));
+    }
+
+    @Operation(summary = "Listar famílias", description = "Lista todas as famílias ou filtra por nome")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")})
+    @GetMapping
+    public ResponseEntity<Page<FamilyDTO>> findAllFamilies(
+            @Parameter(
+                            description = "Filtrar pelo nome da família (busca parcial, case-insensitive)",
+                            example = "Silva")
+                    @RequestParam(required = false)
+                    String name,
+            @Parameter(description = "Paginação: page, size, sort", example = "page=0&size=10&sort=name,asc")
+                    Pageable pageable) {
+
+        if (name != null && !name.isBlank()) {
+            return ResponseEntity.ok(familyService.findFamiliesByName(name, pageable));
+        }
+        return ResponseEntity.ok(familyService.findAllFamilies(pageable));
     }
 }

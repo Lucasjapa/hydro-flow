@@ -1,6 +1,12 @@
+app:
+  version: 0.0.1-SNAPSHOT
+
+
 spring:
   application:
     name: hydro-flow
+    version: 0.0.1-SNAPSHOT
+    formatted-version: " (v${spring.application.version})"
 
   datasource:
     url: jdbc:postgresql://localhost:5433/hf_management

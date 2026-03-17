@@ -8,6 +8,8 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +23,7 @@ public class FamilyService {
         this.familyRepository = familyRepository;
     }
 
-    public FamilyDTO createFamily(FamilyDTO familyDTO) {
+    public FamilyDTO saveFamily(FamilyDTO familyDTO) {
         log.info("Criando família: {}", familyDTO.name());
 
         var family = new Family(
@@ -71,5 +73,26 @@ public class FamilyService {
         FamilyDTO familyUpdated = FamilyDTO.from(familyRepository.save(family));
         log.info("Família atualizada com sucesso. id: {}", id);
         return familyUpdated;
+    }
+
+    public FamilyDTO findFamilyById(Long id) {
+        log.info("Buscando família com id: {}", id);
+
+        return familyRepository.findById(id).map(FamilyDTO::from).orElseThrow(() -> {
+            log.warn("Família não encontrada. id: {}", id);
+            return new EntityNotFoundException("Família não encontrada: " + id);
+        });
+    }
+
+    public Page<FamilyDTO> findAllFamilies(Pageable pageable) {
+        log.info("Listando famílias. página: {}, tamanho: {}", pageable.getPageNumber(), pageable.getPageSize());
+
+        return familyRepository.findAll(pageable).map(FamilyDTO::from);
+    }
+
+    public Page<FamilyDTO> findFamiliesByName(String name, Pageable pageable) {
+        log.info("Buscando famílias por nome: '{}'", name);
+
+        return familyRepository.findByNameContainingIgnoreCase(name, pageable).map(FamilyDTO::from);
     }
 }
