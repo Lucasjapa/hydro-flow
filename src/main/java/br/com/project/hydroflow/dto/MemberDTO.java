@@ -10,7 +10,8 @@ import jakarta.validation.constraints.NotNull;
 public record MemberDTO(
         Long id,
 
-        @NotBlank String name,
+        @NotBlank @Schema(description = "Nome do membro da família", example = "João da Silva")
+        String name,
 
         @NotNull @Min(0) @Max(150) @Schema(description = "Idade do membro", example = "35")
         Integer age,

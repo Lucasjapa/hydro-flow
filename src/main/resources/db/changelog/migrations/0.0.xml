@@ -69,6 +69,9 @@
             <column name="longitude" type="DECIMAL(9,6)">
                 <constraints nullable="false" />
             </column>
+            <column name="cistern_status" type="VARCHAR(10)" defaultValue="NORMAL">
+                <constraints nullable="false" />
+            </column>
         </createTable>
 
         <!-- Primary Key -->
@@ -214,7 +217,10 @@
             <column name="delivery_date" type="DATE">
                 <constraints nullable="false" />
             </column>
-            <column name="water_amount_liters" type="DECIMAL(10,2)">
+            <column name="requested_amount_liters" type="DECIMAL(10,2)">
+                <constraints nullable="false" />
+            </column>
+            <column name="delivered_amount_liters" type="DECIMAL(10,2)">
                 <constraints nullable="false" />
             </column>
         </createTable>

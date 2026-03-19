@@ -48,20 +48,6 @@ public class MonthlyRainfallController {
         return ResponseEntity.created(location).body(monthlyRainfallCreated);
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Atualiza um registro de chuva mensal")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Registro atualizado com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
-        @ApiResponse(responseCode = "404", description = "Registro não encontrado"),
-        @ApiResponse(responseCode = "422", description = "Erro de regra de negócio")
-    })
-    public ResponseEntity<MonthlyRainfallDTO> update(
-            @PathVariable Long id, @RequestBody @Valid MonthlyRainfallDTO dto) {
-        MonthlyRainfallDTO updated = monthlyRainfallService.updateMonthlyRainfall(id, dto);
-        return ResponseEntity.ok(updated);
-    }
-
     @DeleteMapping("/{id}")
     @Operation(summary = "Remove um registro de chuva mensal")
     @ApiResponses({

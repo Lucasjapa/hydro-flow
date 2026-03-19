@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WaterDeliveryRepository extends JpaRepository<WaterDelivery, Long> {
 
-    @Query("SELECT w FROM WaterDelivery w WHERE YEAR(w.deliveryDate) = :year")
-    List<WaterDelivery> findByYear(Integer year);
+    @Query("SELECT w FROM WaterDelivery w WHERE YEAR(w.deliveryDate) = :year AND w.family.id = :familyId")
+    List<WaterDelivery> findByYearAndFamilyId(Integer year, Long familyId);
 }

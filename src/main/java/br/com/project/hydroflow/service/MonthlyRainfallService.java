@@ -15,9 +15,11 @@ public class MonthlyRainfallService {
     private static final Logger log = LoggerFactory.getLogger(MonthlyRainfallService.class);
 
     private final MonthlyRainfallRepository monthlyRainfallRepository;
+    private final FamilyService familyService;
 
-    public MonthlyRainfallService(MonthlyRainfallRepository monthlyRainfallRepository) {
+    public MonthlyRainfallService(MonthlyRainfallRepository monthlyRainfallRepository, FamilyService familyService) {
         this.monthlyRainfallRepository = monthlyRainfallRepository;
+        this.familyService = familyService;
     }
 
     public MonthlyRainfallDTO saveMonthlyRainfall(MonthlyRainfallDTO dto) {
@@ -26,25 +28,11 @@ public class MonthlyRainfallService {
         MonthlyRainfall monthlyRainfall =
                 monthlyRainfallRepository.save(new MonthlyRainfall(dto.year(), dto.month(), dto.rainfallMM()));
 
+        familyService.updateCisternLevelByRainfall(dto.rainfallMM());
+
         MonthlyRainfallDTO monthlyRainfallCreated = MonthlyRainfallDTO.from(monthlyRainfall);
         log.info("Registro de chuva mensal criado com sucesso. id: {}", monthlyRainfallCreated.id());
         return monthlyRainfallCreated;
-    }
-
-    public MonthlyRainfallDTO updateMonthlyRainfall(Long id, MonthlyRainfallDTO dto) {
-        log.info("Atualizando registro de chuva mensal. id: {}", id);
-
-        MonthlyRainfall monthlyRainfall = monthlyRainfallRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Registro de chuva mensal não encontrado. id: " + id));
-
-        monthlyRainfall.setYear(dto.year());
-        monthlyRainfall.setMonth(dto.month());
-        monthlyRainfall.setRainfallMM(dto.rainfallMM());
-
-        MonthlyRainfallDTO updated = MonthlyRainfallDTO.from(monthlyRainfallRepository.save(monthlyRainfall));
-        log.info("Registro de chuva mensal atualizado com sucesso. id: {}", updated.id());
-        return updated;
     }
 
     public void deleteMonthlyRainfall(Long id) {

@@ -1,5 +1,6 @@
 package br.com.project.hydroflow.controller;
 
+import br.com.project.hydroflow.domain.Family;
 import br.com.project.hydroflow.dto.FamilyDTO;
 import br.com.project.hydroflow.service.FamilyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,18 +74,21 @@ public class FamilyController {
         return ResponseEntity.ok(familyService.findFamilyById(id));
     }
 
-    @Operation(summary = "Listar famílias", description = "Lista todas as famílias ou filtra por nome")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")})
     @GetMapping
+    @Operation(summary = "Listar famílias", description = "Lista todas as famílias ou filtra por nome ou status")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")})
     public ResponseEntity<Page<FamilyDTO>> findAllFamilies(
-            @Parameter(
-                            description = "Filtrar pelo nome da família (busca parcial, case-insensitive)",
-                            example = "Silva")
-                    @RequestParam(required = false)
+            @Parameter(description = "Filtrar pelo nome da família", example = "Silva") @RequestParam(required = false)
                     String name,
+            @Parameter(description = "Filtrar pelo status da cisterna", example = "URGENT")
+                    @RequestParam(required = false)
+                    Family.CisternStatus status,
             @Parameter(description = "Paginação: page, size, sort", example = "page=0&size=10&sort=name,asc")
                     Pageable pageable) {
 
+        if (status != null) {
+            return ResponseEntity.ok(familyService.findFamiliesByStatus(status, pageable));
+        }
         if (name != null && !name.isBlank()) {
             return ResponseEntity.ok(familyService.findFamiliesByName(name, pageable));
         }

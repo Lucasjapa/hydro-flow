@@ -21,4 +21,30 @@ O Hydro Flow permite o gerenciamento de:
 - **Liquibase** para versionamento do banco de dados
 - **Docker Compose** para infraestrutura local
 
-http://localhost:8080/swagger-ui/index.html#/
+## 🚀 Primeira Execução
+
+**1. Suba o banco de dados:**
+```bash
+cd infra
+docker compose up -d
+```
+
+**2. Execute a aplicação** pela sua IDE ou via terminal:
+```bash
+./gradlew bootRun
+```
+
+**3. Acesse o Swagger:**
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+## 🗄️ Limpeza do Banco
+
+Caso queira resetar o banco de dados:
+```bash
+cd infra
+./clear-all-data.sh
+```
+
+> ⚠️ Este script apaga todos os dados e recria o banco do zero.

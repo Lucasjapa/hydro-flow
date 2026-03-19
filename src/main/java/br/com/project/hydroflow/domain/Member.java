@@ -20,6 +20,10 @@ public class Member {
     @Column(nullable = false)
     private boolean isBedridden;
 
+    @ManyToOne
+    @JoinColumn(name = "id_family", nullable = false)
+    private Family family;
+
     public Member() {}
 
     public Member(String name, int age, boolean isBedridden) {
@@ -42,5 +46,9 @@ public class Member {
 
     public boolean isBedridden() {
         return isBedridden;
+    }
+
+    public void setFamily(Family family) {
+        this.family = family;
     }
 }

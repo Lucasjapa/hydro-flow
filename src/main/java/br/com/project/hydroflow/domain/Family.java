@@ -38,12 +38,15 @@ public class Family {
     @Column(nullable = false)
     private BigDecimal longitude;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_family")
+    @OneToMany(mappedBy = "family", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> members = new ArrayList<>();
 
     @OneToMany(mappedBy = "family")
     private List<WaterDelivery> waterDeliveries = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cistern_status")
+    private CisternStatus cisternStatus;
 
     public Family() {}
 
@@ -55,7 +58,8 @@ public class Family {
             BigDecimal gutterAreaM2,
             BigDecimal gutterEfficiencyCoefficient,
             BigDecimal latitude,
-            BigDecimal longitude) {
+            BigDecimal longitude,
+            CisternStatus cisternStatus) {
         this.name = name;
         this.cisternCapacityLiters = cisternCapacityLiters;
         this.cisternCurrentLevelLiters = cisternCurrentLevelLiters;
@@ -64,6 +68,13 @@ public class Family {
         this.gutterEfficiencyCoefficient = gutterEfficiencyCoefficient;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.cisternStatus = cisternStatus;
+    }
+
+    public enum CisternStatus {
+        NORMAL,
+        LOW, // abaixo de 10%
+        URGENT // abaixo de 5%
     }
 
     public Long getId() {
@@ -134,6 +145,10 @@ public class Family {
         this.longitude = longitude;
     }
 
+    public CisternStatus getCisternStatus() {
+        return cisternStatus;
+    }
+
     public List<WaterDelivery> getWaterDeliveries() {
         return waterDeliveries;
     }
@@ -142,10 +157,23 @@ public class Family {
         return members;
     }
 
-    public void updateCisternLevel(BigDecimal newLevel) {
-        if (newLevel.compareTo(this.cisternCapacityLiters) > 0) {
-            throw new IllegalArgumentException("O nível atual da cisterna não pode ser maior que a capacidade total");
+    public void addMember(Member member) {
+        member.setFamily(this);
+        this.members.add(member);
+    }
+
+    public void updateCisternLevel(BigDecimal newLevel, int remainingDays) {
+        this.cisternCurrentLevelLiters = newLevel.min(this.cisternCapacityLiters);
+        updateCisternStatus(remainingDays);
+    }
+
+    public void updateCisternStatus(int remainingDays) {
+        if (remainingDays <= 5) {
+            this.cisternStatus = CisternStatus.URGENT;
+        } else if (remainingDays <= 10) {
+            this.cisternStatus = CisternStatus.LOW;
+        } else {
+            this.cisternStatus = CisternStatus.NORMAL;
         }
-        this.cisternCurrentLevelLiters = newLevel;
     }
 }

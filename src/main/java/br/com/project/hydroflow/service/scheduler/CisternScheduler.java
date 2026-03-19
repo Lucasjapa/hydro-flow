@@ -17,7 +17,7 @@ public class CisternScheduler {
         this.familyService = familyService;
     }
 
-    //	@Scheduled(cron = "*/10 * * * * *") // executa a cada 10 segundos, para testes
+    //    	@Scheduled(cron = "*/2 * * * * *") // executa a cada 2 segundos, para testes
     @Scheduled(cron = "0 0 0 * * *")
     public void updateCisternLevel() {
         log.info("Iniciando atualização diária do nível da cisterna");

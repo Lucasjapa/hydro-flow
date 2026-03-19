@@ -48,14 +48,15 @@ public class WaterDeliveryController {
         return ResponseEntity.created(location).body(created);
     }
 
-    @GetMapping("/year/{year}")
-    @Operation(summary = "Busca entregas de água por ano")
+    @GetMapping("/year/{year}/family/{familyId}")
+    @Operation(summary = "Busca entregas de água por ano e família")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Entregas encontradas com sucesso"),
         @ApiResponse(responseCode = "404", description = "Nenhuma entrega encontrada")
     })
-    public ResponseEntity<List<WaterDeliveryDTO>> findByYear(
-            @Parameter(description = "Ano da entrega", example = "2024") @PathVariable Integer year) {
-        return ResponseEntity.ok(waterDeliveryService.findByYear(year));
+    public ResponseEntity<List<WaterDeliveryDTO>> findByYearAndFamilyId(
+            @Parameter(description = "Ano da entrega", example = "2024") @PathVariable Integer year,
+            @Parameter(description = "ID da família", example = "1") @PathVariable Long familyId) {
+        return ResponseEntity.ok(waterDeliveryService.findByYearAndFamilyId(year, familyId));
     }
 }

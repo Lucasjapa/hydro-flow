@@ -37,23 +37,11 @@ public class MonthlyRainfall {
         return year;
     }
 
-    public void setYear(int year) {
-        this.year = year;
-    }
-
     public int getMonth() {
         return month;
     }
 
-    public void setMonth(int month) {
-        this.month = month;
-    }
-
     public BigDecimal getRainfallMM() {
         return rainfallMM;
-    }
-
-    public void setRainfallMM(BigDecimal rainfallMM) {
-        this.rainfallMM = rainfallMM;
     }
 }

@@ -16,8 +16,11 @@ public class WaterDelivery {
     @Column(name = "delivery_date", nullable = false)
     private LocalDate deliveryDate;
 
-    @Column(name = "water_amount_liters", nullable = false)
-    private BigDecimal waterAmountLiters;
+    @Column(name = "requested_amount_liters", nullable = false)
+    private BigDecimal requestedAmountLiters;
+
+    @Column(name = "delivered_amount_liters", nullable = false)
+    private BigDecimal deliveredAmountLiters;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "id_family", nullable = false)
@@ -25,9 +28,11 @@ public class WaterDelivery {
 
     public WaterDelivery() {}
 
-    public WaterDelivery(LocalDate deliveryDate, BigDecimal waterAmountLiters, Family family) {
+    public WaterDelivery(
+            LocalDate deliveryDate, BigDecimal requestedAmountLiters, BigDecimal deliveredAmountLiters, Family family) {
         this.deliveryDate = deliveryDate;
-        this.waterAmountLiters = waterAmountLiters;
+        this.requestedAmountLiters = requestedAmountLiters;
+        this.deliveredAmountLiters = deliveredAmountLiters;
         this.family = family;
     }
 
@@ -39,8 +44,12 @@ public class WaterDelivery {
         return deliveryDate;
     }
 
-    public BigDecimal getWaterAmountLiters() {
-        return waterAmountLiters;
+    public BigDecimal getRequestedAmountLiters() {
+        return requestedAmountLiters;
+    }
+
+    public BigDecimal getDeliveredAmountLiters() {
+        return deliveredAmountLiters;
     }
 
     public Family getFamily() {

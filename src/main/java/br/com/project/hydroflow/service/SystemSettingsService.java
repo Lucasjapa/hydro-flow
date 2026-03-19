@@ -1,5 +1,6 @@
 package br.com.project.hydroflow.service;
 
+import br.com.project.hydroflow.domain.SystemSettings;
 import br.com.project.hydroflow.dto.SystemSettingsDTO;
 import br.com.project.hydroflow.repository.SystemSettingsRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +31,14 @@ public class SystemSettingsService {
                     log.warn("Configurações do sistema não encontradas");
                     return new EntityNotFoundException("Configurações não encontradas");
                 });
+    }
+
+    public SystemSettings getSystemSettings() {
+        log.info("Buscando configurações do sistema");
+        return systemSettingsRepository.findById(1L).orElseThrow(() -> {
+            log.warn("Configurações do sistema não encontradas");
+            return new EntityNotFoundException("Configurações não encontradas");
+        });
     }
 
     public SystemSettingsDTO updateSystemSettings(SystemSettingsDTO systemSettingsDTO) {

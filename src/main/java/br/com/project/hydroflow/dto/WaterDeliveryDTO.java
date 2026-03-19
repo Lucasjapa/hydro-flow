@@ -13,8 +13,11 @@ public record WaterDeliveryDTO(
         @NotNull @Schema(description = "Data da entrega", example = "2024-03-15")
         LocalDate deliveryDate,
 
-        @NotNull @DecimalMin("0.0") @Schema(description = "Quantidade de água em litros", example = "1000.0")
-        BigDecimal waterAmountLiters,
+        @NotNull @DecimalMin("0.0") @Schema(description = "Volume solicitado em litros", example = "1000.0")
+        BigDecimal requestedAmountLiters,
+
+        @NotNull @DecimalMin("0.0") @Schema(description = "Volume efetivamente entregue em litros", example = "900.0")
+        BigDecimal deliveredAmountLiters,
 
         @NotNull @Schema(description = "ID da família", example = "1")
         Long familyId) {
@@ -23,7 +26,8 @@ public record WaterDeliveryDTO(
         return new WaterDeliveryDTO(
                 waterDelivery.getId(),
                 waterDelivery.getDeliveryDate(),
-                waterDelivery.getWaterAmountLiters(),
+                waterDelivery.getRequestedAmountLiters(),
+                waterDelivery.getDeliveredAmountLiters(),
                 waterDelivery.getFamily().getId());
     }
 }
