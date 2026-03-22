@@ -13,12 +13,6 @@ public record FamilyDTO(
         @NotBlank @Schema(description = "Nome da Família", example = "Família Teste")
         String name,
 
-        @NotNull @DecimalMin("0.0") @Schema(description = "Capacidade total da cisterna em litros", example = "10000.0")
-        BigDecimal cisternCapacityLiters,
-
-        @NotNull @DecimalMin("0.0") @Schema(description = "Nível atual da cisterna em litros", example = "5000.0")
-        BigDecimal cisternCurrentLevelLiters,
-
         @NotNull Boolean hasGutterSystem,
 
         @Schema(description = "Área de captação da calha em metros quadrados", example = "50.0")
@@ -39,7 +33,12 @@ public record FamilyDTO(
         @Schema(description = "Longitude geográfica", example = "-36.123456")
         BigDecimal longitude,
 
+        @Schema(description = "Status da família", example = "NORMAL")
+        Family.FamilyStatus familyStatus,
+
         @NotNull @Size(min = 1) List<MemberDTO> members,
+
+        @NotNull @Size(min = 1) List<CisternDTO> cisterns,
 
         @Schema(description = "Consumo diário total da família em litros", example = "56.0")
         BigDecimal dailyConsumption,
@@ -48,50 +47,41 @@ public record FamilyDTO(
         Integer remainingDays,
 
         @Schema(description = "Previsão da próxima data de entrega", example = "2024-04-15")
-        LocalDate nextDeliveryDate,
-
-        @Schema(description = "Status do reservatório", example = "LOW")
-        Family.CisternStatus cisternStatus) {
+        LocalDate nextDeliveryDate) {
 
     public static FamilyDTO from(Family family) {
         return new FamilyDTO(
                 family.getId(),
                 family.getName(),
-                family.getCisternCapacityLiters(),
-                family.getCisternCurrentLevelLiters(),
                 family.isHasGutterSystem(),
                 family.getGutterAreaM2(),
                 family.getGutterEfficiencyCoefficient(),
                 family.getLatitude(),
                 family.getLongitude(),
+                family.getFamilyStatus(),
                 family.getMembers().stream().map(MemberDTO::from).toList(),
+                family.getCisterns().stream().map(CisternDTO::from).toList(),
                 null,
                 null,
-                null,
-                family.getCisternStatus());
+                null);
     }
 
     public static FamilyDTO from(
-            Family family,
-            BigDecimal dailyConsumption,
-            Integer remainingDays,
-            LocalDate nextDeliveryDate,
-            Family.CisternStatus cisternStatus) {
+            Family family, BigDecimal dailyConsumption, Integer remainingDays, LocalDate nextDeliveryDate) {
 
         return new FamilyDTO(
                 family.getId(),
                 family.getName(),
-                family.getCisternCapacityLiters(),
-                family.getCisternCurrentLevelLiters(),
                 family.isHasGutterSystem(),
                 family.getGutterAreaM2(),
                 family.getGutterEfficiencyCoefficient(),
                 family.getLatitude(),
                 family.getLongitude(),
+                family.getFamilyStatus(),
                 family.getMembers().stream().map(MemberDTO::from).toList(),
+                family.getCisterns().stream().map(CisternDTO::from).toList(),
                 dailyConsumption,
                 remainingDays,
-                nextDeliveryDate,
-                cisternStatus);
+                nextDeliveryDate);
     }
 }

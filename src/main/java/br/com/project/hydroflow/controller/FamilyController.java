@@ -12,7 +12,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -80,17 +82,38 @@ public class FamilyController {
     public ResponseEntity<Page<FamilyDTO>> findAllFamilies(
             @Parameter(description = "Filtrar pelo nome da família", example = "Silva") @RequestParam(required = false)
                     String name,
-            @Parameter(description = "Filtrar pelo status da cisterna", example = "URGENT")
+            @Parameter(description = "Filtrar pelo status da família", example = "URGENT")
                     @RequestParam(required = false)
-                    Family.CisternStatus status,
-            @Parameter(description = "Paginação: page, size, sort", example = "page=0&size=10&sort=name,asc")
-                    Pageable pageable) {
+                    Family.FamilyStatus status,
+            @Parameter(description = "Ordenação por nível da cisterna", example = "asc") @RequestParam(required = false)
+                    String cisternLevelSort,
+            @Parameter(description = "Número da página", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Quantidade por página", example = "10") @RequestParam(defaultValue = "10")
+                    int size,
+            @Parameter(description = "Ordenação por nome", example = "asc") @RequestParam(required = false)
+                    String nameSort) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
 
         if (status != null) {
             return ResponseEntity.ok(familyService.findFamiliesByStatus(status, pageable));
         }
         if (name != null && !name.isBlank()) {
             return ResponseEntity.ok(familyService.findFamiliesByName(name, pageable));
+        }
+        if ("asc".equalsIgnoreCase(nameSort)) {
+            pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+            return ResponseEntity.ok(familyService.findAllFamilies(pageable));
+        }
+        if ("desc".equalsIgnoreCase(nameSort)) {
+            pageable = PageRequest.of(page, size, Sort.by("name").descending());
+            return ResponseEntity.ok(familyService.findAllFamilies(pageable));
+        }
+        if ("asc".equalsIgnoreCase(cisternLevelSort)) {
+            return ResponseEntity.ok(familyService.findAllOrderByCisternLevelAsc(pageable));
+        }
+        if ("desc".equalsIgnoreCase(cisternLevelSort)) {
+            return ResponseEntity.ok(familyService.findAllOrderByCisternLevelDesc(pageable));
         }
         return ResponseEntity.ok(familyService.findAllFamilies(pageable));
     }

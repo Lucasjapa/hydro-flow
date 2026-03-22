@@ -1,5 +1,6 @@
 package br.com.project.hydroflow.service;
 
+import br.com.project.hydroflow.domain.Cistern;
 import br.com.project.hydroflow.domain.Family;
 import br.com.project.hydroflow.domain.Member;
 import br.com.project.hydroflow.domain.SystemSettings;
@@ -47,22 +48,19 @@ public class FamilyService {
 
         var family = new Family(
                 familyDTO.name(),
-                familyDTO.cisternCapacityLiters(),
-                familyDTO.cisternCurrentLevelLiters(),
                 familyDTO.hasGutterSystem(),
                 familyDTO.gutterAreaM2(),
                 familyDTO.gutterEfficiencyCoefficient(),
                 familyDTO.latitude(),
-                familyDTO.longitude(),
-                Family.CisternStatus.NORMAL);
+                familyDTO.longitude());
 
         familyDTO.members().stream()
                 .map(memberDTO -> new Member(memberDTO.name(), memberDTO.age(), memberDTO.isBedridden()))
                 .forEach(family::addMember);
 
-        SystemSettings settings = systemSettingsService.getSystemSettings();
-        int remainingDays = calculateRemainingDays(family, settings);
-        family.updateCisternLevel(familyDTO.cisternCurrentLevelLiters(), remainingDays);
+        familyDTO.cisterns().stream()
+                .map(cisternDTO -> new Cistern(cisternDTO.capacityLiters(), cisternDTO.currentLevelLiters(), family))
+                .forEach(family::addCistern);
 
         FamilyDTO familyCreated = FamilyDTO.from(familyRepository.save(family));
         log.info("Família criada com sucesso. id: {}", familyCreated.id());
@@ -78,7 +76,6 @@ public class FamilyService {
         });
 
         family.setName(familyDTO.name());
-        family.setCisternCapacityLiters(familyDTO.cisternCapacityLiters());
         family.setHasGutterSystem(familyDTO.hasGutterSystem());
         family.setGutterAreaM2(familyDTO.gutterAreaM2());
         family.setGutterEfficiencyCoefficient(familyDTO.gutterEfficiencyCoefficient());
@@ -86,10 +83,14 @@ public class FamilyService {
         family.setLongitude(familyDTO.longitude());
 
         family.getMembers().clear();
-
         familyDTO.members().stream()
                 .map(memberDTO -> new Member(memberDTO.name(), memberDTO.age(), memberDTO.isBedridden()))
                 .forEach(family::addMember);
+
+        family.getCisterns().clear();
+        familyDTO.cisterns().stream()
+                .map(cisternDTO -> new Cistern(cisternDTO.capacityLiters(), cisternDTO.currentLevelLiters(), family))
+                .forEach(family::addCistern);
 
         FamilyDTO familyUpdated = FamilyDTO.from(familyRepository.save(family));
         log.info("Família atualizada com sucesso. id: {}", id);
@@ -97,38 +98,24 @@ public class FamilyService {
     }
 
     public FamilyDTO findFamilyById(Long id) {
-        log.info("Buscando família com id: {}", id);
-
-        Family family = familyRepository.findById(id).orElseThrow(() -> {
-            log.warn("Família não encontrada. id: {}", id);
-            return new EntityNotFoundException("Família não encontrada: " + id);
-        });
+        Family family = getFamilyById(id);
 
         SystemSettings settings = systemSettingsService.getSystemSettings();
 
         BigDecimal dailyConsumption = settings.getDailyWaterConsumption()
                 .multiply(BigDecimal.valueOf(family.getMembers().size()));
 
-        int remainingDays = family.getCisternCurrentLevelLiters()
-                .divide(dailyConsumption, 0, RoundingMode.FLOOR)
-                .intValue();
+        BigDecimal totalWater = family.getCisterns().stream()
+                .map(Cistern::getCurrentLevelLiters)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int remainingDays = dailyConsumption.compareTo(BigDecimal.ZERO) == 0
+                ? Integer.MAX_VALUE
+                : totalWater.divide(dailyConsumption, 0, RoundingMode.FLOOR).intValue();
 
         LocalDate nextDeliveryDate = LocalDate.now().plusDays(remainingDays);
 
-        BigDecimal percentage = family.getCisternCurrentLevelLiters()
-                .divide(family.getCisternCapacityLiters(), 4, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100));
-
-        Family.CisternStatus cisternStatus;
-        if (percentage.compareTo(BigDecimal.valueOf(5)) <= 0) {
-            cisternStatus = Family.CisternStatus.URGENT;
-        } else if (percentage.compareTo(BigDecimal.valueOf(10)) <= 0) {
-            cisternStatus = Family.CisternStatus.LOW;
-        } else {
-            cisternStatus = Family.CisternStatus.NORMAL;
-        }
-
-        return FamilyDTO.from(family, dailyConsumption, remainingDays, nextDeliveryDate, cisternStatus);
+        return FamilyDTO.from(family, dailyConsumption, remainingDays, nextDeliveryDate);
     }
 
     public Page<FamilyDTO> findAllFamilies(Pageable pageable) {
@@ -143,9 +130,19 @@ public class FamilyService {
         return familyRepository.findByNameContainingIgnoreCase(name, pageable).map(FamilyDTO::from);
     }
 
-    public Page<FamilyDTO> findFamiliesByStatus(Family.CisternStatus status, Pageable pageable) {
+    public Page<FamilyDTO> findFamiliesByStatus(Family.FamilyStatus status, Pageable pageable) {
         log.info("Buscando famílias por status: {}", status);
-        return familyRepository.findByCisternStatus(status, pageable).map(FamilyDTO::from);
+        return familyRepository.findByFamilyStatus(status, pageable).map(FamilyDTO::from);
+    }
+
+    public Page<FamilyDTO> findAllOrderByCisternLevelAsc(Pageable pageable) {
+        log.info("Buscando famílias ordenadas por nível da cisterna crescente");
+        return familyRepository.findAllOrderByCisternLevelAsc(pageable).map(FamilyDTO::from);
+    }
+
+    public Page<FamilyDTO> findAllOrderByCisternLevelDesc(Pageable pageable) {
+        log.info("Buscando famílias ordenadas por nível da cisterna decrescente");
+        return familyRepository.findAllOrderByCisternLevelDesc(pageable).map(FamilyDTO::from);
     }
 
     @Transactional
@@ -160,22 +157,32 @@ public class FamilyService {
             BigDecimal dailyConsumption = settings.getDailyWaterConsumption()
                     .multiply(BigDecimal.valueOf(family.getMembers().size()));
 
-            BigDecimal newLevel = family.getCisternCurrentLevelLiters()
-                    .subtract(dailyConsumption)
-                    .max(BigDecimal.ZERO);
+            BigDecimal remainingConsumption = dailyConsumption;
 
-            log.info(
-                    "Família id: {} | Membros: {} | Consumo diário: {} | Novo nível: {}",
-                    family.getId(),
-                    family.getMembers().size(),
-                    dailyConsumption,
-                    newLevel);
+            for (Cistern cistern : family.getCisterns()) {
+                if (remainingConsumption.compareTo(BigDecimal.ZERO) <= 0) break;
 
-            family.setCisternCurrentLevelLiters(newLevel);
+                BigDecimal toConsume = remainingConsumption.min(cistern.getCurrentLevelLiters());
+                BigDecimal newLevel = cistern.getCurrentLevelLiters().subtract(toConsume);
+
+                remainingConsumption = remainingConsumption.subtract(toConsume);
+
+                int remainingDays = calculateRemainingDays(cistern, dailyConsumption);
+
+                log.info(
+                        "Família id: {} | Cisterna id: {} | Consumido: {}L | Novo nível: {}L | Restante consumo: {}L",
+                        family.getId(),
+                        cistern.getId(),
+                        toConsume,
+                        newLevel,
+                        remainingConsumption);
+
+                cistern.updateLevel(newLevel, remainingDays);
+            }
         });
 
         familyRepository.saveAll(families);
-        log.info("Nível da cisterna atualizado para {} famílias", families.size());
+        log.info("Nível das cisternas atualizado para {} famílias", families.size());
     }
 
     public void updateCisternLevelByRainfall(BigDecimal rainfallMM) {
@@ -192,30 +199,34 @@ public class FamilyService {
                     .multiply(rainfallMeters)
                     .multiply(BigDecimal.valueOf(1000));
 
-            BigDecimal newLevel = family.getCisternCurrentLevelLiters().add(volumeLiters);
+            BigDecimal dailyConsumption = settings.getDailyWaterConsumption()
+                    .multiply(BigDecimal.valueOf(family.getMembers().size()));
 
-            log.info(
-                    "Família id: {} | Chuva: {}mm | Volume captado: {}L | Novo nível: {}L",
-                    family.getId(),
-                    rainfallMM,
-                    volumeLiters,
-                    newLevel);
+            family.getCisterns().forEach(cistern -> {
+                BigDecimal newLevel = cistern.getCurrentLevelLiters().add(volumeLiters);
 
-            int remainingDays = calculateRemainingDays(family, settings);
-            family.updateCisternLevel(newLevel, remainingDays);
+                int remainingDays = calculateRemainingDays(cistern, dailyConsumption);
+
+                log.info(
+                        "Família id: {} | Cisterna id: {} | Chuva: {}mm | Volume captado: {}L | Novo nível: {}L",
+                        family.getId(),
+                        cistern.getId(),
+                        rainfallMM,
+                        volumeLiters,
+                        newLevel);
+
+                cistern.updateLevel(newLevel, remainingDays);
+            });
         });
 
         familyRepository.saveAll(families);
-        log.info("Nível da cisterna atualizado para {} famílias com sistema de calhas", families.size());
+        log.info("Nível das cisternas atualizado para {} famílias com sistema de calhas", families.size());
     }
 
-    public int calculateRemainingDays(Family family, SystemSettings settings) {
-        BigDecimal dailyConsumption = settings.getDailyWaterConsumption()
-                .multiply(BigDecimal.valueOf(family.getMembers().size()));
-
+    public int calculateRemainingDays(Cistern cistern, BigDecimal dailyConsumption) {
         if (dailyConsumption.compareTo(BigDecimal.ZERO) == 0) return Integer.MAX_VALUE;
 
-        return family.getCisternCurrentLevelLiters()
+        return cistern.getCurrentLevelLiters()
                 .divide(dailyConsumption, 0, RoundingMode.FLOOR)
                 .intValue();
     }

@@ -1,5 +1,6 @@
 package br.com.project.hydroflow.service;
 
+import br.com.project.hydroflow.domain.Cistern;
 import br.com.project.hydroflow.domain.Family;
 import br.com.project.hydroflow.domain.SystemSettings;
 import br.com.project.hydroflow.domain.WaterDelivery;
@@ -36,21 +37,30 @@ public class WaterDeliveryService {
 
         Family family = familyService.getFamilyById(waterDeliveryDTO.familyId());
 
-        BigDecimal availableSpace = family.getCisternCapacityLiters().subtract(family.getCisternCurrentLevelLiters());
+        BigDecimal dailyConsumption = settings.getDailyWaterConsumption()
+                .multiply(BigDecimal.valueOf(family.getMembers().size()));
 
-        BigDecimal actualDeliveredAmount =
-                waterDeliveryDTO.deliveredAmountLiters().min(availableSpace);
+        BigDecimal remainingWater = waterDeliveryDTO.deliveredAmountLiters();
 
-        if (actualDeliveredAmount.compareTo(waterDeliveryDTO.deliveredAmountLiters()) < 0) {
-            log.info(
-                    "Volume entregue corrigido de {}L para {}L pois ultrapassaria a capacidade da cisterna",
-                    waterDeliveryDTO.deliveredAmountLiters(),
-                    actualDeliveredAmount);
+        for (Cistern cistern : family.getCisterns()) {
+            if (remainingWater.compareTo(BigDecimal.ZERO) <= 0) break;
+
+            BigDecimal availableSpace = cistern.getCapacityLiters().subtract(cistern.getCurrentLevelLiters());
+            BigDecimal toFill = remainingWater.min(availableSpace);
+
+            BigDecimal newLevel = cistern.getCurrentLevelLiters().add(toFill);
+            cistern.updateLevel(newLevel, familyService.calculateRemainingDays(cistern, dailyConsumption));
+
+            log.info("Cisterna id: {} | Adicionado: {}L | Novo nível: {}L", cistern.getId(), toFill, newLevel);
+
+            remainingWater = remainingWater.subtract(toFill);
         }
 
-        BigDecimal newLevel = family.getCisternCurrentLevelLiters().add(actualDeliveredAmount);
+        log.info("Água restante após distribuição: {}L", remainingWater);
 
-        family.updateCisternLevel(newLevel, familyService.calculateRemainingDays(family, settings));
+        BigDecimal actualDeliveredAmount =
+                waterDeliveryDTO.deliveredAmountLiters().subtract(remainingWater);
+
         familyService.save(family);
 
         WaterDelivery saved = waterDeliveryRepository.save(new WaterDelivery(

@@ -17,12 +17,6 @@ public class Family {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "cistern_capacity_liters", nullable = false)
-    private BigDecimal cisternCapacityLiters;
-
-    @Column(name = "cistern_current_level_liters", nullable = false)
-    private BigDecimal cisternCurrentLevelLiters;
-
     @Column(name = "has_gutter_system", nullable = false)
     private boolean hasGutterSystem;
 
@@ -38,43 +32,40 @@ public class Family {
     @Column(nullable = false)
     private BigDecimal longitude;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "family_status", nullable = false)
+    private FamilyStatus familyStatus = FamilyStatus.NORMAL;
+
     @OneToMany(mappedBy = "family", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> members = new ArrayList<>();
 
     @OneToMany(mappedBy = "family")
     private List<WaterDelivery> waterDeliveries = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "cistern_status")
-    private CisternStatus cisternStatus;
+    @OneToMany(mappedBy = "family", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Cistern> cisterns = new ArrayList<>();
+
+    public enum FamilyStatus {
+        NORMAL,
+        LOW, // abaixo de 10%
+        URGENT // abaixo de 5%
+    }
 
     public Family() {}
 
     public Family(
             String name,
-            BigDecimal cisternCapacityLiters,
-            BigDecimal cisternCurrentLevelLiters,
             boolean hasGutterSystem,
             BigDecimal gutterAreaM2,
             BigDecimal gutterEfficiencyCoefficient,
             BigDecimal latitude,
-            BigDecimal longitude,
-            CisternStatus cisternStatus) {
+            BigDecimal longitude) {
         this.name = name;
-        this.cisternCapacityLiters = cisternCapacityLiters;
-        this.cisternCurrentLevelLiters = cisternCurrentLevelLiters;
         this.hasGutterSystem = hasGutterSystem;
         this.gutterAreaM2 = gutterAreaM2;
         this.gutterEfficiencyCoefficient = gutterEfficiencyCoefficient;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.cisternStatus = cisternStatus;
-    }
-
-    public enum CisternStatus {
-        NORMAL,
-        LOW, // abaixo de 10%
-        URGENT // abaixo de 5%
     }
 
     public Long getId() {
@@ -87,22 +78,6 @@ public class Family {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public BigDecimal getCisternCapacityLiters() {
-        return cisternCapacityLiters;
-    }
-
-    public void setCisternCapacityLiters(BigDecimal cisternCapacityLiters) {
-        this.cisternCapacityLiters = cisternCapacityLiters;
-    }
-
-    public BigDecimal getCisternCurrentLevelLiters() {
-        return cisternCurrentLevelLiters;
-    }
-
-    public void setCisternCurrentLevelLiters(BigDecimal cisternCurrentLevelLiters) {
-        this.cisternCurrentLevelLiters = cisternCurrentLevelLiters;
     }
 
     public boolean isHasGutterSystem() {
@@ -145,16 +120,20 @@ public class Family {
         this.longitude = longitude;
     }
 
-    public CisternStatus getCisternStatus() {
-        return cisternStatus;
+    public FamilyStatus getFamilyStatus() {
+        return familyStatus;
     }
 
-    public List<WaterDelivery> getWaterDeliveries() {
-        return waterDeliveries;
+    public void setFamilyStatus(FamilyStatus familyStatus) {
+        this.familyStatus = familyStatus;
     }
 
     public List<Member> getMembers() {
         return members;
+    }
+
+    public List<Cistern> getCisterns() {
+        return cisterns;
     }
 
     public void addMember(Member member) {
@@ -162,18 +141,18 @@ public class Family {
         this.members.add(member);
     }
 
-    public void updateCisternLevel(BigDecimal newLevel, int remainingDays) {
-        this.cisternCurrentLevelLiters = newLevel.min(this.cisternCapacityLiters);
-        updateCisternStatus(remainingDays);
+    public void addCistern(Cistern cistern) {
+        cistern.setFamily(this);
+        this.cisterns.add(cistern);
     }
 
-    public void updateCisternStatus(int remainingDays) {
+    public void updateStatus(int remainingDays) {
         if (remainingDays <= 5) {
-            this.cisternStatus = CisternStatus.URGENT;
+            this.familyStatus = FamilyStatus.URGENT;
         } else if (remainingDays <= 10) {
-            this.cisternStatus = CisternStatus.LOW;
+            this.familyStatus = FamilyStatus.LOW;
         } else {
-            this.cisternStatus = CisternStatus.NORMAL;
+            this.familyStatus = FamilyStatus.NORMAL;
         }
     }
 }

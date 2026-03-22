@@ -20,17 +20,7 @@ public class SystemSettingsService {
     }
 
     public SystemSettingsDTO findSystemSettings() {
-        log.info("Buscando configurações do sistema");
-        return systemSettingsRepository
-                .findById(1L)
-                .map(settings -> {
-                    log.info("Configurações encontradas com sucesso");
-                    return SystemSettingsDTO.from(settings);
-                })
-                .orElseThrow(() -> {
-                    log.warn("Configurações do sistema não encontradas");
-                    return new EntityNotFoundException("Configurações não encontradas");
-                });
+        return SystemSettingsDTO.from(getSystemSettings());
     }
 
     public SystemSettings getSystemSettings() {
