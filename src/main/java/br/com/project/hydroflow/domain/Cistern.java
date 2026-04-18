@@ -46,6 +46,10 @@ public class Cistern {
         this.family = family;
     }
 
+    public Family getFamily() {
+        return family;
+    }
+
     public void updateLevel(BigDecimal newLevel, int remainingDays) {
         this.currentLevelLiters = newLevel.min(this.capacityLiters);
         this.family.updateStatus(remainingDays);
