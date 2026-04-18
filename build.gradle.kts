@@ -4,6 +4,8 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 
     id("com.diffplug.spotless") version "6.25.0"
+
+    id("com.adarshr.test-logger") version "4.0.0"
 }
 
 group = "br.com.project"
@@ -77,4 +79,24 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+
+    jvmArgs("-XX:+EnableDynamicAgentLoading")
+
+    outputs.upToDateWhen { false }
+}
+
+testlogger {
+    theme = com.adarshr.gradle.testlogger.theme.ThemeType.MOCHA
+    showExceptions = true
+    showStackTraces = true
+    showCauses = true
+    slowThreshold = 1000
+    showSummary = true
+    showPassed = true
+    showSkipped = true
+    showFailed = true
+}
+
+tasks.bootRun {
+    dependsOn(tasks.named("test"))
 }
