@@ -15,12 +15,6 @@ public record FamilyDTO(
 
         @NotNull Boolean hasGutterSystem,
 
-        @Schema(description = "Área de captação da calha em metros quadrados", example = "50.0")
-        BigDecimal gutterAreaM2,
-
-        @Schema(description = "Coeficiente de eficiência da calha (0 a 1)", example = "0.80")
-        BigDecimal gutterEfficiencyCoefficient,
-
         @NotNull
         @DecimalMin("-90.0")
         @DecimalMax("90.0")
@@ -54,8 +48,6 @@ public record FamilyDTO(
                 family.getId(),
                 family.getName(),
                 family.isHasGutterSystem(),
-                family.getGutterAreaM2(),
-                family.getGutterEfficiencyCoefficient(),
                 family.getLatitude(),
                 family.getLongitude(),
                 family.getFamilyStatus(),
@@ -73,8 +65,6 @@ public record FamilyDTO(
                 family.getId(),
                 family.getName(),
                 family.isHasGutterSystem(),
-                family.getGutterAreaM2(),
-                family.getGutterEfficiencyCoefficient(),
                 family.getLatitude(),
                 family.getLongitude(),
                 family.getFamilyStatus(),

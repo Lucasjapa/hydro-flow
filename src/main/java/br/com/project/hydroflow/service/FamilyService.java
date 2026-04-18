@@ -46,13 +46,8 @@ public class FamilyService {
     public FamilyDTO saveFamily(FamilyDTO familyDTO) {
         log.info("Criando família: {}", familyDTO.name());
 
-        var family = new Family(
-                familyDTO.name(),
-                familyDTO.hasGutterSystem(),
-                familyDTO.gutterAreaM2(),
-                familyDTO.gutterEfficiencyCoefficient(),
-                familyDTO.latitude(),
-                familyDTO.longitude());
+        var family =
+                new Family(familyDTO.name(), familyDTO.hasGutterSystem(), familyDTO.latitude(), familyDTO.longitude());
 
         familyDTO.members().stream()
                 .map(memberDTO -> new Member(memberDTO.name(), memberDTO.age(), memberDTO.isBedridden()))
@@ -77,8 +72,6 @@ public class FamilyService {
 
         family.setName(familyDTO.name());
         family.setHasGutterSystem(familyDTO.hasGutterSystem());
-        family.setGutterAreaM2(familyDTO.gutterAreaM2());
-        family.setGutterEfficiencyCoefficient(familyDTO.gutterEfficiencyCoefficient());
         family.setLatitude(familyDTO.latitude());
         family.setLongitude(familyDTO.longitude());
 
@@ -183,44 +176,6 @@ public class FamilyService {
 
         familyRepository.saveAll(families);
         log.info("Nível das cisternas atualizado para {} famílias", families.size());
-    }
-
-    public void updateCisternLevelByRainfall(BigDecimal rainfallMM) {
-        log.info("Atualizando nível da cisterna por chuva: {}mm", rainfallMM);
-
-        SystemSettings settings = systemSettingsService.getSystemSettings();
-        List<Family> families = familyRepository.findByHasGutterSystemTrue();
-
-        families.forEach(family -> {
-            BigDecimal rainfallMeters = rainfallMM.divide(BigDecimal.valueOf(1000), 10, RoundingMode.HALF_UP);
-
-            BigDecimal volumeLiters = family.getGutterAreaM2()
-                    .multiply(family.getGutterEfficiencyCoefficient())
-                    .multiply(rainfallMeters)
-                    .multiply(BigDecimal.valueOf(1000));
-
-            BigDecimal dailyConsumption = settings.getDailyWaterConsumption()
-                    .multiply(BigDecimal.valueOf(family.getMembers().size()));
-
-            family.getCisterns().forEach(cistern -> {
-                BigDecimal newLevel = cistern.getCurrentLevelLiters().add(volumeLiters);
-
-                int remainingDays = calculateRemainingDays(cistern, dailyConsumption);
-
-                log.info(
-                        "Família id: {} | Cisterna id: {} | Chuva: {}mm | Volume captado: {}L | Novo nível: {}L",
-                        family.getId(),
-                        cistern.getId(),
-                        rainfallMM,
-                        volumeLiters,
-                        newLevel);
-
-                cistern.updateLevel(newLevel, remainingDays);
-            });
-        });
-
-        familyRepository.saveAll(families);
-        log.info("Nível das cisternas atualizado para {} famílias com sistema de calhas", families.size());
     }
 
     public int calculateRemainingDays(Cistern cistern, BigDecimal dailyConsumption) {

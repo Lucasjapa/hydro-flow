@@ -55,8 +55,6 @@
             <column name="has_gutter_system" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false" />
             </column>
-            <column name="gutter_area_m2" type="DECIMAL(10,2)" />
-            <column name="gutter_efficiency_coefficient" type="DECIMAL(5,3)" />
             <column name="latitude" type="DECIMAL(9,6)">
                 <constraints nullable="false" />
             </column>
@@ -74,19 +72,6 @@
         <!-- Sequence -->
         <createSequence sequenceName="hf_family_id" incrementBy="1" startValue="1" />
 
-        <!-- Check Constraint -->
-        <sql>
-        ALTER TABLE hf_family
-            ADD CONSTRAINT chk_gutter_system
-                CHECK (
-                    has_gutter_system = false
-                        OR (
-                        has_gutter_system = true
-                            AND gutter_area_m2 IS NOT NULL
-                            AND gutter_efficiency_coefficient IS NOT NULL
-                        )
-                    );
-        </sql>
     </changeSet>
 
     <changeSet id="20260312-03" author="Lucas Cavalcante">
@@ -161,36 +146,6 @@
             INSERT INTO hf_system_settings (id, daily_water_consumption)
             VALUES (1, 50);
         </sql>
-    </changeSet>
-
-    <changeSet id="20260312-06" author="Lucas Cavalcante">
-        <preConditions onFail="HALT">
-            <not>
-                <tableExists tableName="hf_monthly_rainfall" />
-            </not>
-        </preConditions>
-
-        <!-- Table -->
-        <createTable tableName="hf_monthly_rainfall">
-            <column name="id" type="BIGINT">
-                <constraints nullable="false" />
-            </column>
-            <column name="year" type="INT">
-                <constraints nullable="false" />
-            </column>
-            <column name="month" type="INT">
-                <constraints nullable="false" />
-            </column>
-            <column name="rainfall_mm" type="DECIMAL(10,2)">
-                <constraints nullable="false" />
-            </column>
-        </createTable>
-
-        <!-- Primary Key -->
-        <addPrimaryKey tableName="hf_monthly_rainfall" columnNames="id" constraintName="pk_monthly_rainfall" />
-
-        <!-- Sequence -->
-        <createSequence sequenceName="hf_monthly_rainfall_id" incrementBy="1" startValue="1" />
     </changeSet>
 
     <changeSet id="20260312-07" author="Lucas Cavalcante">

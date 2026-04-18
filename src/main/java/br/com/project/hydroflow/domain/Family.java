@@ -20,12 +20,6 @@ public class Family {
     @Column(name = "has_gutter_system", nullable = false)
     private boolean hasGutterSystem;
 
-    @Column(name = "gutter_area_m2")
-    private BigDecimal gutterAreaM2;
-
-    @Column(name = "gutter_efficiency_coefficient")
-    private BigDecimal gutterEfficiencyCoefficient;
-
     @Column(nullable = false)
     private BigDecimal latitude;
 
@@ -53,17 +47,9 @@ public class Family {
 
     public Family() {}
 
-    public Family(
-            String name,
-            boolean hasGutterSystem,
-            BigDecimal gutterAreaM2,
-            BigDecimal gutterEfficiencyCoefficient,
-            BigDecimal latitude,
-            BigDecimal longitude) {
+    public Family(String name, boolean hasGutterSystem, BigDecimal latitude, BigDecimal longitude) {
         this.name = name;
         this.hasGutterSystem = hasGutterSystem;
-        this.gutterAreaM2 = gutterAreaM2;
-        this.gutterEfficiencyCoefficient = gutterEfficiencyCoefficient;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -86,22 +72,6 @@ public class Family {
 
     public void setHasGutterSystem(boolean hasGutterSystem) {
         this.hasGutterSystem = hasGutterSystem;
-    }
-
-    public BigDecimal getGutterAreaM2() {
-        return gutterAreaM2;
-    }
-
-    public void setGutterAreaM2(BigDecimal gutterAreaM2) {
-        this.gutterAreaM2 = gutterAreaM2;
-    }
-
-    public BigDecimal getGutterEfficiencyCoefficient() {
-        return gutterEfficiencyCoefficient;
-    }
-
-    public void setGutterEfficiencyCoefficient(BigDecimal gutterEfficiencyCoefficient) {
-        this.gutterEfficiencyCoefficient = gutterEfficiencyCoefficient;
     }
 
     public BigDecimal getLatitude() {
