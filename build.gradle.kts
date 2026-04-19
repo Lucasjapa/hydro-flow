@@ -49,21 +49,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-liquibase")
 
-    // Source: https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
+    // Remova as duas linhas do Jackson e deixe só essa
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
-
-    // Source: https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
-    implementation("com.fasterxml.jackson.core:jackson-core:2.21.1")
-
-    // Source: https://mvnrepository.com/artifact/tools.jackson.core/jackson-core
-    implementation("tools.jackson.core:jackson-core:3.1.0")
-
-    // Source: https://mvnrepository.com/artifact/org.liquibase/liquibase-core
-    implementation("org.liquibase:liquibase-core:5.0.1")
-
-    // Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-liquibase
-    implementation("org.springframework.boot:spring-boot-starter-liquibase:4.0.3")
 
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
@@ -71,9 +62,11 @@ dependencies {
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
-    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

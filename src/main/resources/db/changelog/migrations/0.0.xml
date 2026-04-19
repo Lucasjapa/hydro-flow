@@ -10,130 +10,267 @@
     <changeSet id="20260312-01" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_user" />
+                <tableExists tableName="hf_role"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_role">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_role" columnNames="id" constraintName="pk_role"/>
+
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_role_id" incrementBy="1" startValue="1"/>
+    </changeSet>
+
+    <changeSet id="20260312-02" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_user"/>
             </not>
         </preConditions>
 
         <!-- Table -->
         <createTable tableName="hf_user">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="email" type="VARCHAR(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="password" type="VARCHAR(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_role" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="first_access" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
         <!-- Primary Key -->
-        <addPrimaryKey tableName="hf_user" columnNames="id" constraintName="pk_users" />
+        <addPrimaryKey tableName="hf_user" columnNames="id" constraintName="pk_user"/>
 
         <!-- Sequence -->
-        <createSequence sequenceName="hf_user_id" incrementBy="1" startValue="1" />
+        <createSequence sequenceName="hf_user_id" incrementBy="1" startValue="1"/>
+
+        <!-- Foreign Keys -->
+        <addForeignKeyConstraint baseTableName="hf_user" baseColumnNames="id_role"
+                                 referencedTableName="hf_role" referencedColumnNames="id"
+                                 constraintName="fk_2219700746514"/>
     </changeSet>
 
-    <changeSet id="20260312-02" author="Lucas Cavalcante">
+
+    <changeSet id="20260312-03" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_family" />
+                <tableExists tableName="hf_permission"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_permission">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_permission" columnNames="id" constraintName="pk_permission"/>
+
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_permission_id" incrementBy="1" startValue="1"/>
+
+        <!-- Dados iniciais -->
+        <insert tableName="hf_permission">
+            <column name="id" value="1"/>
+            <column name="name" value="REGISTER_DELIVERY"/>
+        </insert>
+
+        <insert tableName="hf_permission">
+            <column name="id" value="2"/>
+            <column name="name" value="EDIT_FAMILY"/>
+        </insert>
+
+        <insert tableName="hf_permission">
+            <column name="id" value="3"/>
+            <column name="name" value="MANAGE_USERS"/>
+        </insert>
+
+        <insert tableName="hf_permission">
+            <column name="id" value="4"/>
+            <column name="name" value="ADMIN"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20260312-04" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_role_permission"/>
+            </not>
+        </preConditions>
+
+        <!-- Table -->
+        <createTable tableName="hf_role_permission">
+            <column name="id_role" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_permission" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Primary Key -->
+        <addPrimaryKey
+                tableName="hf_role_permission"
+                columnNames="id_role, id_permission"
+                constraintName="pk_role_permission"/>
+
+        <!-- Foreign Keys -->
+        <addForeignKeyConstraint baseTableName="hf_role_permission" baseColumnNames="id_role"
+                                 referencedTableName="hf_role" referencedColumnNames="id"
+                                 constraintName="fk_5529022438651"/>
+
+        <addForeignKeyConstraint baseTableName="hf_role_permission" baseColumnNames="id_permission"
+                                 referencedTableName="hf_permission" referencedColumnNames="id"
+                                 constraintName="fk_5788888819463"/>
+    </changeSet>
+
+    <changeSet id="20260312-05" author="Lucas Cavalcante">
+
+        <insert tableName="hf_role">
+            <column name="id" value="1"/>
+            <column name="name" value="Administrador"/>
+        </insert>
+
+        <insert tableName="hf_role_permission">
+            <column name="id_role" value="1"/>
+            <column name="id_permission" value="4"/>
+        </insert>
+
+        <insert tableName="hf_user">
+            <column name="id" value="1"/>
+            <column name="name" value="Administrador"/>
+            <column name="email" value="${ADMIN_EMAIL}"/>
+            <column name="password" value="${ADMIN_PASSWORD_HASH}"/>
+            <column name="id_role" value="1"/>
+            <column name="first_access" value="true"/>
+        </insert>
+
+    </changeSet>
+
+    <changeSet id="20260312-06" author="Lucas Cavalcante">
+        <preConditions onFail="HALT">
+            <not>
+                <tableExists tableName="hf_family"/>
             </not>
         </preConditions>
 
         <!-- Table -->
         <createTable tableName="hf_family">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="has_gutter_system" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="latitude" type="DECIMAL(9,6)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="longitude" type="DECIMAL(9,6)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="family_status" type="VARCHAR(10)" defaultValue="NORMAL">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
         <!-- Primary Key -->
-        <addPrimaryKey tableName="hf_family" columnNames="id" constraintName="pk_family" />
+        <addPrimaryKey tableName="hf_family" columnNames="id" constraintName="pk_family"/>
 
         <!-- Sequence -->
-        <createSequence sequenceName="hf_family_id" incrementBy="1" startValue="1" />
+        <createSequence sequenceName="hf_family_id" incrementBy="1" startValue="1"/>
 
     </changeSet>
 
-    <changeSet id="20260312-03" author="Lucas Cavalcante">
+    <changeSet id="20260312-07" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_member" />
+                <tableExists tableName="hf_member"/>
             </not>
         </preConditions>
 
         <!-- Table -->
         <createTable tableName="hf_member">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="age" type="INT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="is_bedridden" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="id_family" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
         <!-- Primary Key -->
-        <addPrimaryKey tableName="hf_member" columnNames="id" constraintName="pk_member" />
+        <addPrimaryKey tableName="hf_member" columnNames="id" constraintName="pk_member"/>
 
         <!-- Foreign Key -->
         <addForeignKeyConstraint baseTableName="hf_member" baseColumnNames="id_family"
-                referencedTableName="hf_family" referencedColumnNames="id"
-                constraintName="fk_8548311937012" />
+                                 referencedTableName="hf_family" referencedColumnNames="id"
+                                 constraintName="fk_8548311937012"/>
 
         <!-- Sequence -->
-        <createSequence sequenceName="hf_member_id" incrementBy="1" startValue="1" />
+        <createSequence sequenceName="hf_member_id" incrementBy="1" startValue="1"/>
     </changeSet>
 
-    <changeSet id="20260312-04" author="Lucas Cavalcante">
+    <changeSet id="20260312-08" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_system_settings" />
+                <tableExists tableName="hf_system_settings"/>
             </not>
         </preConditions>
 
         <!-- Table -->
         <createTable tableName="hf_system_settings">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="daily_water_consumption" type="DECIMAL(10,2)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
         <!-- Primary Key -->
-        <addPrimaryKey tableName="hf_system_settings" columnNames="id" constraintName="pk_system_settings" />
+        <addPrimaryKey tableName="hf_system_settings" columnNames="id" constraintName="pk_system_settings"/>
     </changeSet>
 
-    <changeSet id="20260312-05" author="Lucas Cavalcante">
+    <changeSet id="20260312-09" author="Lucas Cavalcante">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*)
@@ -148,78 +285,78 @@
         </sql>
     </changeSet>
 
-    <changeSet id="20260312-07" author="Lucas Cavalcante">
+    <changeSet id="20260312-10" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_water_delivery" />
+                <tableExists tableName="hf_water_delivery"/>
             </not>
         </preConditions>
 
         <!-- Table -->
         <createTable tableName="hf_water_delivery">
             <column name="id" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="id_family" type="BIGINT">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="delivery_date" type="DATE">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="requested_amount_liters" type="DECIMAL(10,2)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
             <column name="delivered_amount_liters" type="DECIMAL(10,2)">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </createTable>
 
         <!-- Primary Key -->
-        <addPrimaryKey tableName="hf_water_delivery" columnNames="id" constraintName="pk_water_delivery" />
+        <addPrimaryKey tableName="hf_water_delivery" columnNames="id" constraintName="pk_water_delivery"/>
 
         <!-- Foreign Key -->
         <addForeignKeyConstraint baseTableName="hf_water_delivery" baseColumnNames="id_family"
-                referencedTableName="hf_family" referencedColumnNames="id"
-                constraintName="fk_0195593710570" />
+                                 referencedTableName="hf_family" referencedColumnNames="id"
+                                 constraintName="fk_0195593710570"/>
 
         <!-- Sequence -->
-        <createSequence sequenceName="hf_water_delivery_id" incrementBy="1" startValue="1" />
+        <createSequence sequenceName="hf_water_delivery_id" incrementBy="1" startValue="1"/>
     </changeSet>
 
-    <changeSet id="20260312-08" author="Lucas Cavalcante">
+    <changeSet id="20260312-11" author="Lucas Cavalcante">
         <preConditions onFail="HALT">
             <not>
-                <tableExists tableName="hf_cistern" />
+                <tableExists tableName="hf_cistern"/>
             </not>
         </preConditions>
 
-            <!-- Table -->
-            <createTable tableName="hf_cistern">
-                <column name="id" type="BIGINT">
-                    <constraints nullable="false" />
-                </column>
-                <column name="cistern_capacity_liters" type="DECIMAL(10,2)">
-                    <constraints nullable="false" />
-                </column>
-                <column name="cistern_current_level_liters" type="DECIMAL(10,2)" defaultValue="0">
-                    <constraints nullable="false" />
-                </column>
-                <column name="id_family" type="BIGINT">
-                    <constraints nullable="false" />
-                </column>
-            </createTable>
+        <!-- Table -->
+        <createTable tableName="hf_cistern">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cistern_capacity_liters" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cistern_current_level_liters" type="DECIMAL(10,2)" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_family" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
 
 
-            <!-- Primary Key -->
-            <addPrimaryKey tableName="hf_cistern" columnNames="id" constraintName="pk_cistern" />
+        <!-- Primary Key -->
+        <addPrimaryKey tableName="hf_cistern" columnNames="id" constraintName="pk_cistern"/>
 
-            <!-- Foreign Key -->
-            <addForeignKeyConstraint baseTableName="hf_cistern" baseColumnNames="id_family"
-                    referencedTableName="hf_family" referencedColumnNames="id"
-                    constraintName="fk_2434785900447" />
+        <!-- Foreign Key -->
+        <addForeignKeyConstraint baseTableName="hf_cistern" baseColumnNames="id_family"
+                                 referencedTableName="hf_family" referencedColumnNames="id"
+                                 constraintName="fk_2434785900447"/>
 
-            <!-- Sequence -->
-            <createSequence sequenceName="hf_cistern_id" startValue="1" incrementBy="1" />
+        <!-- Sequence -->
+        <createSequence sequenceName="hf_cistern_id" startValue="1" incrementBy="1"/>
     </changeSet>
 
 </databaseChangeLog>

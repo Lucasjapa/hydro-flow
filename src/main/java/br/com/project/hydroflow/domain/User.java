@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -24,17 +25,29 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_role")
+    private Role role;
+
+    @Column(name = "first_access", nullable = false)
+    private boolean firstAccess = true;
+
     public User() {}
 
-    public User(String name, String email, String password) {
+    public User(String name, String email, String password, Role role) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        if (role == null) return List.of();
+
+        return role.getPermissions().stream()
+                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                .toList();
     }
 
     @Override
@@ -69,5 +82,21 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Boolean isFirstAccess() {
+        return firstAccess;
+    }
+
+    public void setFirstAccess(Boolean firstAccess) {
+        this.firstAccess = firstAccess;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

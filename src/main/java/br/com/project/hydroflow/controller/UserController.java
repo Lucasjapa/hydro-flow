@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -30,11 +31,13 @@ public class UserController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GERENCIAR_USUARIOS')")
     @Operation(summary = "Cria um novo usuário")
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
-        @ApiResponse(responseCode = "422", description = "Erro de regra de negócio")
+            @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "403", description = "Sem permissão para criar usuário"),
+            @ApiResponse(responseCode = "422", description = "Erro de regra de negócio")
     })
     public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserDTO userDTO) {
         UserDTO userCreated = userService.saveUser(userDTO);
@@ -48,12 +51,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('GERENCIAR_USUARIOS') or #id == authentication.principal.id")
     @Operation(summary = "Atualiza um usuário")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
-        @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
-        @ApiResponse(responseCode = "422", description = "Erro de regra de negócio")
+            @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "403", description = "Sem permissão para atualizar usuário"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+            @ApiResponse(responseCode = "422", description = "Erro de regra de negócio")
     })
     public ResponseEntity<UserDTO> updateUser(
             @Parameter(description = "ID do usuário", example = "1") @PathVariable Long id,

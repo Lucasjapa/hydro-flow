@@ -13,7 +13,22 @@ spring:
     url: jdbc:postgresql://localhost:5433/hf_management
     username: admin
     password: admin
+    hikari:
+      pool-name: HydroFlowPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+    parameters:
+      ADMIN_EMAIL: ${ADMIN_EMAIL:admin}
+      #ADMIN_PASSWORD: ${ADMIN_PASSWORD:admin}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:$2a$10$u0Kk6GdB0zT6vn.He1j9OOjmjpkZ5k.w5sIuts/GYEyWnQIwidlGC}
 
+logging:
+  level:
+    liquibase: DEBUG
+    org.springframework.boot.autoconfigure.liquibase: DEBUG
