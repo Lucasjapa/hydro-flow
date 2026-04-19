@@ -1,6 +1,7 @@
 package br.com.project.hydroflow.controller;
 
 import br.com.project.hydroflow.dto.SystemSettingsDTO;
+import br.com.project.hydroflow.security.annotation.AdminOnly;
 import br.com.project.hydroflow.service.SystemSettingsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/hf/system-settings")
+@AdminOnly
 @Tag(name = "Configuração do Sistema", description = "Gerenciamento de configurações do sistema")
 @ApiResponses({
     @ApiResponse(responseCode = "401", description = "Não autenticado"),

@@ -2,6 +2,8 @@ package br.com.project.hydroflow.controller;
 
 import br.com.project.hydroflow.domain.Family;
 import br.com.project.hydroflow.dto.FamilyDTO;
+import br.com.project.hydroflow.security.annotation.AdminOrManageUsers;
+import br.com.project.hydroflow.security.annotation.AuthenticatedOnly;
 import br.com.project.hydroflow.service.FamilyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/hf/families")
+@AuthenticatedOnly
 @Tag(name = "Família", description = "Gerenciamento de famílias")
 @ApiResponses({
     @ApiResponse(responseCode = "401", description = "Não autenticado"),
@@ -37,6 +40,7 @@ public class FamilyController {
 
     @PostMapping
     @Operation(summary = "Cria uma nova família")
+    @AdminOrManageUsers
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Família criada com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos"),
@@ -55,6 +59,7 @@ public class FamilyController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza uma família")
+    @AdminOrManageUsers
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Família atualizada com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos"),

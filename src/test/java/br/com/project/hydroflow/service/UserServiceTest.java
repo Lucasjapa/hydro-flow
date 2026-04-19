@@ -4,14 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import br.com.project.hydroflow.domain.Permission;
 import br.com.project.hydroflow.domain.Role;
 import br.com.project.hydroflow.domain.User;
 import br.com.project.hydroflow.dto.UserDTO;
 import br.com.project.hydroflow.repository.UserRepository;
+import br.com.project.hydroflow.security.Permissions;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
 import java.util.Optional;
@@ -23,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,8 +96,9 @@ class UserServiceTest {
             when(userRepository.save(existing)).thenReturn(existing);
 
             UserDTO input = new UserDTO(null, "Novo Nome", "novo@example.com", "novaSenha12", null);
+            Authentication auth = authenticationWithPrincipal(principalComPermissoes(Permissions.REGISTER_DELIVERY));
 
-            UserDTO result = userService.updateUser(1L, input);
+            UserDTO result = userService.updateUser(1L, input, auth);
 
             assertThat(result.name()).isEqualTo("Novo Nome");
             assertThat(result.email()).isEqualTo("novo@example.com");
@@ -113,8 +118,9 @@ class UserServiceTest {
             when(userRepository.save(existing)).thenReturn(existing);
 
             UserDTO input = new UserDTO(null, "User X", "ux@example.com", null, null);
+            Authentication auth = authenticationWithPrincipal(principalComPermissoes(Permissions.REGISTER_DELIVERY));
 
-            userService.updateUser(2L, input);
+            userService.updateUser(2L, input, auth);
 
             assertThat(existing.getPassword()).isEqualTo("hash-original");
             verify(passwordEncoder, never()).encode(any());
@@ -130,11 +136,68 @@ class UserServiceTest {
             when(userRepository.save(existing)).thenReturn(existing);
 
             UserDTO input = new UserDTO(null, "User X", "ux@example.com", "   ", null);
+            Authentication auth = authenticationWithPrincipal(principalComPermissoes(Permissions.EDIT_FAMILY));
 
-            userService.updateUser(3L, input);
+            userService.updateUser(3L, input, auth);
 
             assertThat(existing.getPassword()).isEqualTo("hash-original");
             verify(passwordEncoder, never()).encode(any());
+            verify(roleService, never()).findById(anyLong());
+        }
+
+        @Test
+        @DisplayName("deve atualizar cargo quando principal tiver permissão ADMIN e roleId informado")
+        void deveAtualizarCargoQuandoPrincipalForAdminERoleIdInformado() {
+            Role oldRole = roleWithId(2L, "USER");
+            Role newRole = roleWithId(5L, "ADMIN");
+            User existing = userWithId(4L, "Alvo", "alvo@example.com", "hash", oldRole);
+            when(userRepository.findById(4L)).thenReturn(Optional.of(existing));
+            when(roleService.findById(5L)).thenReturn(newRole);
+            when(userRepository.save(existing)).thenReturn(existing);
+
+            UserDTO input = new UserDTO(null, "Alvo", "alvo@example.com", null, 5L);
+            Authentication auth = authenticationWithPrincipal(principalComPermissoes(Permissions.ADMIN));
+
+            userService.updateUser(4L, input, auth);
+
+            assertThat(existing.getRole()).isSameAs(newRole);
+            verify(roleService).findById(5L);
+            verify(passwordEncoder, never()).encode(any());
+        }
+
+        @Test
+        @DisplayName("deve atualizar cargo quando principal tiver permissão MANAGE_USERS")
+        void deveAtualizarCargoQuandoPrincipalTiverManageUsers() {
+            Role oldRole = roleWithId(2L, "USER");
+            Role newRole = roleWithId(6L, "OPERADOR");
+            User existing = userWithId(5L, "Alvo", "alvo2@example.com", "hash", oldRole);
+            when(userRepository.findById(5L)).thenReturn(Optional.of(existing));
+            when(roleService.findById(6L)).thenReturn(newRole);
+            when(userRepository.save(existing)).thenReturn(existing);
+
+            UserDTO input = new UserDTO(null, "Alvo", "alvo2@example.com", null, 6L);
+            Authentication auth = authenticationWithPrincipal(principalComPermissoes(Permissions.MANAGE_USERS));
+
+            userService.updateUser(5L, input, auth);
+
+            assertThat(existing.getRole()).isSameAs(newRole);
+            verify(roleService).findById(6L);
+        }
+
+        @Test
+        @DisplayName("não deve alterar cargo quando principal não for admin mesmo com roleId informado")
+        void naoDeveAlterarCargoQuandoPrincipalNaoForAdminMesmoComRoleId() {
+            Role oldRole = roleWithId(2L, "USER");
+            User existing = userWithId(6L, "Alvo", "alvo3@example.com", "hash", oldRole);
+            when(userRepository.findById(6L)).thenReturn(Optional.of(existing));
+            when(userRepository.save(existing)).thenReturn(existing);
+
+            UserDTO input = new UserDTO(null, "Alvo", "alvo3@example.com", null, 99L);
+            Authentication auth = authenticationWithPrincipal(principalComPermissoes(Permissions.EDIT_FAMILY));
+
+            userService.updateUser(6L, input, auth);
+
+            assertThat(existing.getRole()).isSameAs(oldRole);
             verify(roleService, never()).findById(anyLong());
         }
 
@@ -144,8 +207,9 @@ class UserServiceTest {
             when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
             UserDTO input = new UserDTO(null, "X", "x@example.com", "senha1234", 1L);
+            Authentication auth = authenticationWithPrincipal(principalComPermissoes(Permissions.ADMIN));
 
-            assertThatThrownBy(() -> userService.updateUser(99L, input))
+            assertThatThrownBy(() -> userService.updateUser(99L, input, auth))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("99");
 
@@ -153,6 +217,30 @@ class UserServiceTest {
             verify(passwordEncoder, never()).encode(any());
             verify(roleService, never()).findById(anyLong());
         }
+    }
+
+    private static Authentication authenticationWithPrincipal(User principal) {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(principal);
+        return auth;
+    }
+
+    /**
+     * Usuário autenticado com as permissões indicadas (nomes como gravados em {@link Permission}).
+     */
+    private static User principalComPermissoes(String... permissionNames) {
+        Role role = new Role("CALLER");
+        role.setId(999L);
+        for (String name : permissionNames) {
+            role.getPermissions().add(permissionWithName(name));
+        }
+        return userWithId(900L, "Caller", "caller@test.com", "hash", role);
+    }
+
+    private static Permission permissionWithName(String name) {
+        Permission p = new Permission();
+        setField(p, "name", name);
+        return p;
     }
 
     private static Role roleWithId(Long id, String name) {
@@ -163,13 +251,17 @@ class UserServiceTest {
 
     private static User userWithId(Long id, String name, String email, String password, Role role) {
         User user = new User(name, email, password, role);
+        setField(user, "id", id);
+        return user;
+    }
+
+    private static void setField(Object target, String fieldName, Object value) {
         try {
-            Field idField = User.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(user, id);
+            Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
         }
-        return user;
     }
 }

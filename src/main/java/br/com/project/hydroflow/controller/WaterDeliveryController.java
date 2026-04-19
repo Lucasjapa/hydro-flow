@@ -1,6 +1,7 @@
 package br.com.project.hydroflow.controller;
 
 import br.com.project.hydroflow.dto.WaterDeliveryDTO;
+import br.com.project.hydroflow.security.annotation.AdminOrRegisterDelivery;
 import br.com.project.hydroflow.service.WaterDeliveryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,6 +33,7 @@ public class WaterDeliveryController {
 
     @PostMapping
     @Operation(summary = "Cria uma nova entrega de água")
+    @AdminOrRegisterDelivery
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Entrega criada com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados inválidos"),

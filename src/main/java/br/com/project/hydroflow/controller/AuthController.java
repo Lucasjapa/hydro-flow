@@ -7,6 +7,7 @@ import br.com.project.hydroflow.dto.LoginDTO;
 import br.com.project.hydroflow.dto.TokenDTO;
 import br.com.project.hydroflow.repository.UserRepository;
 import br.com.project.hydroflow.security.JwtService;
+import br.com.project.hydroflow.security.annotation.AuthenticatedOnly;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -66,6 +67,7 @@ public class AuthController {
     }
 
     @PatchMapping("/change-password")
+    @AuthenticatedOnly
     @Operation(summary = "Troca a senha no primeiro acesso")
     public ResponseEntity<TokenDTO> changePassword(@RequestBody @Valid ChangePasswordDTO dto) {
         User user =
