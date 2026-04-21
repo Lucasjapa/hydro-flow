@@ -1,0 +1,89 @@
+@startuml user-access-classes
+title User Access Module - Class Diagram
+
+skinparam classAttributeIconSize 0
+top to bottom direction
+hide empty members
+
+class UserController {
+  - userService: UserService
+  + createUser(userDTO: UserDTO)
+  + updateUser(id: Long, userDTO: UserDTO, authentication: Authentication)
+}
+
+class UserService {
+  - userRepository: UserRepository
+  - roleService: RoleService
+  - passwordEncoder: PasswordEncoder
+  + saveUser(userDTO: UserDTO)
+  + updateUser(id: Long, userDTO: UserDTO, authentication: Authentication)
+}
+
+class AuthorizationService {
+  + isAdminOrOwner(id: Long, authentication: Authentication)
+}
+
+class RoleService {
+  - roleRepository: RoleRepository
+  + findById(id: Long)
+  + saveRole(roleDTO: RoleDTO)
+  + updateRole(id: Long, roleDTO: RoleDTO)
+}
+
+interface UserRepository {
+  + findById(id: Long)
+  + save(user: User)
+}
+
+interface RoleRepository {
+  + findById(id: Long)
+  + save(role: Role)
+}
+
+class User {
+  - id: Long
+  - name: String
+  - email: String
+  - password: String
+  - firstAccess: boolean
+  - role: Role
+}
+
+class Role {
+  - id: Long
+  - name: String
+  - permissions: Set<Permission>
+}
+
+class Permission {
+  - id: Long
+  - name: String
+}
+
+class UserDTO {
+  + id: Long
+  + name: String
+  + email: String
+  + password: String
+  + roleId: Long
+}
+
+class RoleDTO {
+  + id: Long
+  + name: String
+}
+
+UserController --> UserService
+UserController --> AuthorizationService : "@PreAuthorize"
+UserController --> UserDTO
+UserService --> UserRepository
+UserService --> RoleService
+UserService --> UserDTO
+RoleService --> RoleRepository
+RoleService --> RoleDTO
+UserRepository --> User
+RoleRepository --> Role
+User --> Role
+Role --> Permission
+
+@enduml

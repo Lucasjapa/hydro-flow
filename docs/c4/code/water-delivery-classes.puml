@@ -1,0 +1,88 @@
+@startuml water-delivery-classes
+title Water Delivery Module - Class Diagram
+
+skinparam classAttributeIconSize 0
+top to bottom direction
+hide empty members
+
+class WaterDeliveryController {
+  - waterDeliveryService: WaterDeliveryService
+  + save(dto: WaterDeliveryDTO)
+  + findByYearAndFamilyId(year: Integer, familyId: Long)
+}
+
+class WaterDeliveryService {
+  - waterDeliveryRepository: WaterDeliveryRepository
+  - familyService: FamilyService
+  - systemSettingsService: SystemSettingsService
+  + saveWaterDelivery(waterDeliveryDTO: WaterDeliveryDTO)
+  + findByYearAndFamilyId(year: Integer, familyId: Long)
+}
+
+class FamilyService {
+  + getFamilyById(id: Long)
+  + calculateRemainingDays(cistern: Cistern, dailyConsumption: BigDecimal)
+  + save(family: Family)
+}
+
+class SystemSettingsService {
+  + getSystemSettings()
+}
+
+interface WaterDeliveryRepository {
+  + save(waterDelivery: WaterDelivery)
+  + findByYearAndFamilyId(year: Integer, familyId: Long)
+}
+
+class WaterDelivery {
+  - id: Long
+  - deliveryDate: LocalDate
+  - requestedAmountLiters: BigDecimal
+  - deliveredAmountLiters: BigDecimal
+  - family: Family
+}
+
+class Family {
+  - id: Long
+  - members: List<Member>
+  - cisterns: List<Cistern>
+}
+
+class Member {
+  - id: Long
+  - age: int
+}
+
+class Cistern {
+  - id: Long
+  - capacityLiters: BigDecimal
+  - currentLevelLiters: BigDecimal
+  + updateLevel(newLevel: BigDecimal, remainingDays: int)
+}
+
+class SystemSettings {
+  - id: Long
+  - dailyWaterConsumption: BigDecimal
+}
+
+class WaterDeliveryDTO {
+  + id: Long
+  + deliveryDate: LocalDate
+  + requestedAmountLiters: BigDecimal
+  + deliveredAmountLiters: BigDecimal
+  + familyId: Long
+}
+
+WaterDeliveryController --> WaterDeliveryService
+WaterDeliveryController --> WaterDeliveryDTO
+WaterDeliveryService --> WaterDeliveryRepository
+WaterDeliveryService --> FamilyService
+WaterDeliveryService --> SystemSettingsService
+WaterDeliveryService --> WaterDeliveryDTO
+WaterDeliveryRepository --> WaterDelivery
+WaterDelivery --> Family
+Family o-- Member
+Family o-- Cistern
+SystemSettingsService --> SystemSettings
+
+@enduml

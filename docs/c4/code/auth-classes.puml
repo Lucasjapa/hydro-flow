@@ -1,0 +1,96 @@
+@startuml auth-classes
+title Auth Module - Class Diagram
+
+skinparam classAttributeIconSize 0
+left to right direction
+hide empty members
+
+class AuthController {
+  - authenticationManager: AuthenticationManager
+  - jwtService: JwtService
+  - userRepository: UserRepository
+  - passwordEncoder: PasswordEncoder
+  + login(loginDTO: LoginDTO)
+  + changePassword(dto: ChangePasswordDTO)
+}
+
+class JwtAuthenticationFilter {
+  - jwtService: JwtService
+  - userDetailsService: UserDetailsService
+}
+
+class JwtService {
+  - secret: String
+  - expiration: Long
+  + generateToken(user: User)
+  + extractEmail(token: String)
+  + isTokenValid(token: String, userDetails: UserDetails)
+}
+
+class UserDetailsServiceImpl {
+  - userRepository: UserRepository
+  + loadUserByUsername(email: String)
+}
+
+class SecurityConfig {
+  - jwtAuthenticationFilter: JwtAuthenticationFilter
+  - userDetailsService: UserDetailsService
+  + securityFilterChain(http: HttpSecurity)
+  + authenticationProvider()
+}
+
+interface UserDetailsService
+interface UserRepository {
+  + findByEmail(email: String)
+  + findById(id: Long)
+  + save(user: User)
+}
+
+class User {
+  - id: Long
+  - email: String
+  - password: String
+  - firstAccess: boolean
+  - role: Role
+}
+
+class Role {
+  - id: Long
+  - name: String
+}
+
+class LoginDTO {
+  + email: String
+  + password: String
+}
+
+class ChangePasswordDTO {
+  + userId: Long
+  + newPassword: String
+}
+
+class TokenDTO {
+  + token: String
+}
+
+class FirstAccessDTO {
+  + userId: Long
+  + message: String
+}
+
+UserDetailsServiceImpl ..|> UserDetailsService
+AuthController --> JwtService
+AuthController --> UserRepository
+AuthController --> LoginDTO
+AuthController --> ChangePasswordDTO
+AuthController --> TokenDTO
+AuthController --> FirstAccessDTO
+JwtAuthenticationFilter --> JwtService
+JwtAuthenticationFilter --> UserDetailsService
+UserDetailsServiceImpl --> UserRepository
+UserRepository --> User
+User --> Role
+SecurityConfig --> JwtAuthenticationFilter
+SecurityConfig --> UserDetailsService
+
+@enduml

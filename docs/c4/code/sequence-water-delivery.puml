@@ -1,0 +1,24 @@
+@startuml sequence-water-delivery
+title Water Delivery Registration Flow
+
+actor User
+participant WaterDeliveryController
+participant WaterDeliveryService
+participant SystemSettingsService
+participant FamilyService
+participant WaterDeliveryRepository
+
+User -> WaterDeliveryController : POST /hf/water-deliveries(WaterDeliveryDTO)
+WaterDeliveryController -> WaterDeliveryService : saveWaterDelivery(dto)
+WaterDeliveryService -> SystemSettingsService : getSystemSettings()
+SystemSettingsService --> WaterDeliveryService : SystemSettings
+WaterDeliveryService -> FamilyService : getFamilyById(dto.familyId)
+FamilyService --> WaterDeliveryService : Family
+WaterDeliveryService -> WaterDeliveryService : distribute water across cisterns
+WaterDeliveryService -> FamilyService : save(family)
+WaterDeliveryService -> WaterDeliveryRepository : save(WaterDelivery)
+WaterDeliveryRepository --> WaterDeliveryService : WaterDelivery
+WaterDeliveryService --> WaterDeliveryController : WaterDeliveryDTO
+WaterDeliveryController --> User : 201 Created
+
+@enduml

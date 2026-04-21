@@ -1,0 +1,78 @@
+@startuml backend-components
+!include <C4/C4_Component.puml>
+
+LAYOUT_WITH_LEGEND()
+
+title Hydro Flow Backend - Components
+
+Person(user, "User", "Uses the backend API.")
+ContainerDb(postgres, "PostgreSQL", "PostgreSQL 15", "Relational database configured in application.yml and docker-compose.")
+
+Container_Boundary(backend_api, "Backend API") {
+    Component(authController, "AuthController", "REST Controller", "Handles login and first-access password change.")
+    Component(familyController, "FamilyController", "REST Controller", "Exposes family management and query endpoints.")
+    Component(systemSettingsController, "SystemSettingsController", "REST Controller", "Exposes system settings endpoints.")
+    Component(userController, "UserController", "REST Controller", "Exposes user management endpoints.")
+    Component(waterDeliveryController, "WaterDeliveryController", "REST Controller", "Exposes water delivery endpoints.")
+
+    Component(authorizationService, "AuthorizationService", "Business Service", "Evaluates method-security ownership/admin rules.")
+    Component(familyService, "FamilyService", "Business Service", "Manages families, cistern calculations, and daily consumption updates.")
+    Component(roleService, "RoleService", "Business Service", "Loads and manages roles.")
+    Component(systemSettingsService, "SystemSettingsService", "Business Service", "Loads and updates global system settings.")
+    Component(userService, "UserService", "Business Service", "Creates and updates users, passwords, and roles.")
+    Component(waterDeliveryService, "WaterDeliveryService", "Business Service", "Registers deliveries and distributes water across cisterns.")
+    Component(cisternScheduler, "CisternScheduler", "Scheduler Component", "Runs daily cistern level updates.")
+
+    Component(familyRepository, "FamilyRepository", "Repository", "JPA access to Family aggregates.")
+    Component(roleRepository, "RoleRepository", "Repository", "JPA access to Role entities.")
+    Component(systemSettingsRepository, "SystemSettingsRepository", "Repository", "JPA access to SystemSettings.")
+    Component(userRepository, "UserRepository", "Repository", "JPA access to User entities.")
+    Component(waterDeliveryRepository, "WaterDeliveryRepository", "Repository", "JPA access to WaterDelivery records.")
+
+    Component(jwtAuthenticationFilter, "JwtAuthenticationFilter", "Security Component", "Extracts bearer tokens and populates the security context.")
+    Component(jwtService, "JwtService", "Security Component", "Generates and validates JWT tokens.")
+    Component(userDetailsServiceImpl, "UserDetailsServiceImpl", "Security Component", "Loads authenticated users by email.")
+    Component(securityConfig, "SecurityConfig", "Infrastructure Component", "Configures Spring Security, CORS, stateless sessions, and filter chain.")
+}
+
+Rel(user, authController, "Authenticates", "HTTPS/JSON")
+Rel(user, familyController, "Manages families", "HTTPS/JSON")
+Rel(user, systemSettingsController, "Manages settings", "HTTPS/JSON")
+Rel(user, userController, "Manages users", "HTTPS/JSON")
+Rel(user, waterDeliveryController, "Registers and queries deliveries", "HTTPS/JSON")
+
+Rel(securityConfig, jwtAuthenticationFilter, "Registers")
+Rel(securityConfig, userDetailsServiceImpl, "Uses")
+Rel(jwtAuthenticationFilter, jwtService, "Validates tokens with")
+Rel(jwtAuthenticationFilter, userDetailsServiceImpl, "Loads users through")
+Rel(userDetailsServiceImpl, userRepository, "Reads users from")
+Rel(authController, jwtService, "Generates tokens with")
+Rel(authController, userRepository, "Reads and updates users with")
+
+Rel(familyController, familyService, "Calls")
+Rel(systemSettingsController, systemSettingsService, "Calls")
+Rel(userController, userService, "Calls")
+Rel(userController, authorizationService, "Uses via @PreAuthorize")
+Rel(waterDeliveryController, waterDeliveryService, "Calls")
+
+Rel(userService, userRepository, "Persists users with")
+Rel(userService, roleService, "Loads roles through")
+Rel(roleService, roleRepository, "Persists roles with")
+
+Rel(familyService, familyRepository, "Persists and queries families with")
+Rel(familyService, systemSettingsService, "Reads daily consumption rules from")
+Rel(systemSettingsService, systemSettingsRepository, "Persists settings with")
+
+Rel(waterDeliveryService, waterDeliveryRepository, "Persists deliveries with")
+Rel(waterDeliveryService, familyService, "Loads and updates family data through")
+Rel(waterDeliveryService, systemSettingsService, "Reads settings through")
+
+Rel(cisternScheduler, familyService, "Triggers daily update on")
+
+Rel(familyRepository, postgres, "Reads and writes")
+Rel(roleRepository, postgres, "Reads and writes")
+Rel(systemSettingsRepository, postgres, "Reads and writes")
+Rel(userRepository, postgres, "Reads and writes")
+Rel(waterDeliveryRepository, postgres, "Reads and writes")
+
+@enduml
