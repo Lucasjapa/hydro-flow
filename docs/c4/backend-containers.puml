@@ -1,0 +1,18 @@
+@startuml backend-containers
+!include <C4/C4_Container.puml>
+
+LAYOUT_WITH_LEGEND()
+
+title Hydro Flow Backend - Containers
+
+Person(user, "User", "Uses the backend API.")
+
+System_Boundary(hydro_flow, "Hydro Flow Backend") {
+    Container(backend_api, "Backend API", "Spring Boot 4, Spring Web MVC, Spring Security, Spring Data JPA, Liquibase", "Single backend application exposing REST endpoints and enforcing JWT-based authentication/authorization.")
+    ContainerDb(postgres, "PostgreSQL", "PostgreSQL 15", "Primary relational database for users, roles, families, cisterns, water deliveries, and system settings.")
+}
+
+Rel(user, backend_api, "Calls REST endpoints", "HTTPS/JSON")
+Rel(backend_api, postgres, "Reads and writes data", "JPA/Hibernate")
+
+@enduml

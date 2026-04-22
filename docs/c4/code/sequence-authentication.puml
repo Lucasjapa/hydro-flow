@@ -1,0 +1,24 @@
+@startuml sequence-authentication
+title Authentication Flow
+
+actor User
+participant AuthController
+participant AuthenticationManager
+participant UserRepository
+participant JwtService
+
+User -> AuthController : POST /hf/auth/login(LoginDTO)
+AuthController -> AuthenticationManager : authenticate(email, password)
+AuthenticationManager --> AuthController : authenticated
+AuthController -> UserRepository : findByEmail(email)
+UserRepository --> AuthController : User
+
+alt first access
+  AuthController --> User : 403 FirstAccessDTO
+else regular login
+  AuthController -> JwtService : generateToken(user)
+  JwtService --> AuthController : JWT
+  AuthController --> User : 200 TokenDTO
+end
+
+@enduml

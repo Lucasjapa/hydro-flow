@@ -1,0 +1,14 @@
+@startuml backend-context
+!include <C4/C4_Context.puml>
+
+LAYOUT_WITH_LEGEND()
+
+title Hydro Flow Backend - System Context
+
+Person(user, "User", "Uses the Hydro Flow backend through HTTP endpoints.")
+
+System(backend, "Hydro Flow Backend", "Spring Boot 4", "Backend API for authentication, family management, water delivery tracking, user administration, and system settings.")
+
+Rel(user, backend, "Uses", "HTTPS/JSON")
+
+@enduml

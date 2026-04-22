@@ -1,0 +1,104 @@
+@startuml family-classes
+title Family Module - Class Diagram
+
+skinparam classAttributeIconSize 0
+left to right direction
+hide empty members
+
+class FamilyController {
+  - familyService: FamilyService
+  + createFamily(familyDTO: FamilyDTO)
+  + updateFamily(id: Long, familyDTO: FamilyDTO)
+  + findFamilyById(id: Long)
+  + findAllFamilies(...)
+}
+
+class FamilyService {
+  - familyRepository: FamilyRepository
+  - systemSettingsService: SystemSettingsService
+  + saveFamily(familyDTO: FamilyDTO)
+  + updateFamily(id: Long, familyDTO: FamilyDTO)
+  + findFamilyById(id: Long)
+  + updateAllCisternLevels()
+  + calculateRemainingDays(cistern: Cistern, dailyConsumption: BigDecimal)
+}
+
+class SystemSettingsService {
+  + getSystemSettings()
+}
+
+interface FamilyRepository {
+  + findById(id: Long)
+  + findAll(pageable: Pageable)
+  + findByNameContainingIgnoreCase(name: String, pageable: Pageable)
+  + findByFamilyStatus(status: FamilyStatus, pageable: Pageable)
+  + save(family: Family)
+  + saveAll(families: List<Family>)
+}
+
+class Family {
+  - id: Long
+  - name: String
+  - hasGutterSystem: boolean
+  - latitude: BigDecimal
+  - longitude: BigDecimal
+  - familyStatus: FamilyStatus
+  - members: List<Member>
+  - cisterns: List<Cistern>
+  + addMember(member: Member)
+  + addCistern(cistern: Cistern)
+  + updateStatus(remainingDays: int)
+}
+
+class Member {
+  - id: Long
+  - name: String
+  - age: int
+  - isBedridden: boolean
+}
+
+class Cistern {
+  - id: Long
+  - capacityLiters: BigDecimal
+  - currentLevelLiters: BigDecimal
+  - family: Family
+  + updateLevel(newLevel: BigDecimal, remainingDays: int)
+}
+
+class FamilyDTO {
+  + id: Long
+  + name: String
+  + hasGutterSystem: Boolean
+  + familyStatus: FamilyStatus
+  + members: List<MemberDTO>
+  + cisterns: List<CisternDTO>
+  + dailyConsumption: BigDecimal
+  + remainingDays: Integer
+  + nextDeliveryDate: LocalDate
+}
+
+class MemberDTO {
+  + id: Long
+  + name: String
+  + age: Integer
+  + isBedridden: Boolean
+}
+
+class CisternDTO {
+  + id: Long
+  + capacityLiters: BigDecimal
+  + currentLevelLiters: BigDecimal
+}
+
+FamilyController --> FamilyService
+FamilyController --> FamilyDTO
+FamilyService --> FamilyRepository
+FamilyService --> SystemSettingsService
+FamilyService --> FamilyDTO
+FamilyRepository --> Family
+Family *-- Member
+Family *-- Cistern
+FamilyDTO o-- MemberDTO
+FamilyDTO o-- CisternDTO
+
+@enduml

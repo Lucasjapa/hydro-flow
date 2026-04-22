@@ -1,0 +1,52 @@
+@startuml system-settings-scheduling-classes
+title System Settings and Scheduling Module - Class Diagram
+
+skinparam classAttributeIconSize 0
+left to right direction
+hide empty members
+
+class SystemSettingsController {
+  - systemSettingsService: SystemSettingsService
+  + findSystemSettings()
+  + updateSystemSettings(systemSettingsDTO: SystemSettingsDTO)
+}
+
+class SystemSettingsService {
+  - systemSettingsRepository: SystemSettingsRepository
+  + findSystemSettings()
+  + getSystemSettings()
+  + updateSystemSettings(systemSettingsDTO: SystemSettingsDTO)
+}
+
+class CisternScheduler {
+  - familyService: FamilyService
+  + updateCisternLevel()
+}
+
+class FamilyService {
+  + updateAllCisternLevels()
+}
+
+interface SystemSettingsRepository {
+  + findById(id: Long)
+  + save(systemSettings: SystemSettings)
+}
+
+class SystemSettings {
+  - id: Long
+  - dailyWaterConsumption: BigDecimal
+}
+
+class SystemSettingsDTO {
+  + id: Long
+  + dailyWaterConsumption: BigDecimal
+}
+
+SystemSettingsController --> SystemSettingsService
+SystemSettingsController --> SystemSettingsDTO
+SystemSettingsService --> SystemSettingsRepository
+SystemSettingsService --> SystemSettings
+SystemSettingsService --> SystemSettingsDTO
+CisternScheduler --> FamilyService
+
+@enduml

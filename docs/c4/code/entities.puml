@@ -1,0 +1,74 @@
+@startuml entities
+title JPA Entity Relationship Diagram
+
+skinparam classAttributeIconSize 0
+left to right direction
+hide empty methods
+
+entity Family {
+  *id: Long
+  --
+  name: String
+  hasGutterSystem: boolean
+  latitude: BigDecimal
+  longitude: BigDecimal
+  familyStatus: FamilyStatus
+}
+
+entity Member {
+  *id: Long
+  --
+  name: String
+  age: int
+  isBedridden: boolean
+}
+
+entity Cistern {
+  *id: Long
+  --
+  capacityLiters: BigDecimal
+  currentLevelLiters: BigDecimal
+}
+
+entity WaterDelivery {
+  *id: Long
+  --
+  deliveryDate: LocalDate
+  requestedAmountLiters: BigDecimal
+  deliveredAmountLiters: BigDecimal
+}
+
+entity User {
+  *id: Long
+  --
+  name: String
+  email: String
+  password: String
+  firstAccess: boolean
+}
+
+entity Role {
+  *id: Long
+  --
+  name: String
+}
+
+entity Permission {
+  *id: Long
+  --
+  name: String
+}
+
+entity SystemSettings {
+  *id: Long
+  --
+  dailyWaterConsumption: BigDecimal
+}
+
+Family ||--o{ Member : members
+Family ||--o{ Cistern : cisterns
+Family ||--o{ WaterDelivery : waterDeliveries
+Role ||--o{ User : users
+Role }o--o{ Permission : permissions
+
+@enduml
