@@ -8,7 +8,20 @@ hide empty members
 class UserController {
   - userService: UserService
   + createUser(userDTO: UserDTO)
-  + updateUser(id: Long, userDTO: UserDTO, authentication: Authentication)
+  + updateUser(id: Long, updateUserDTO: UpdateUserDTO)
+}
+
+class UserManagementController {
+  - userService: UserService
+  - roleService: RoleService
+  - permissionService: PermissionService
+  + findAllUsers()
+  + updateUserRole(id: Long, dto: UpdateUserRoleDTO)
+  + deleteUser(id: Long)
+  + findAllRoles()
+  + createRole(roleDTO: RoleDTO)
+  + updateRole(id: Long, roleDTO: RoleDTO)
+  + deleteRole(id: Long)
 }
 
 class UserService {
@@ -16,27 +29,31 @@ class UserService {
   - roleService: RoleService
   - passwordEncoder: PasswordEncoder
   + saveUser(userDTO: UserDTO)
-  + updateUser(id: Long, userDTO: UserDTO, authentication: Authentication)
-}
-
-class AuthorizationService {
-  + isAdminOrOwner(id: Long, authentication: Authentication)
+  + updateUser(id: Long, updateUserDTO: UpdateUserDTO)
+  + updateUserRole(id: Long, dto: UpdateUserRoleDTO)
+  + deleteUser(id: Long)
 }
 
 class RoleService {
   - roleRepository: RoleRepository
+  - userRepository: UserRepository
   + findById(id: Long)
   + saveRole(roleDTO: RoleDTO)
   + updateRole(id: Long, roleDTO: RoleDTO)
+  + deleteRole(id: Long)
 }
 
 interface UserRepository {
   + findById(id: Long)
+  + findByEmail(email: String)
+  + existsByEmail(email: String)
   + save(user: User)
+  + delete(user: User)
 }
 
 interface RoleRepository {
   + findById(id: Long)
+  + countByPermissions_Name(name: String)
   + save(role: Role)
 }
 
@@ -68,19 +85,23 @@ class UserDTO {
   + roleId: Long
 }
 
+class UpdateUserRoleDTO {
+  + roleId: Long
+}
+
 class RoleDTO {
   + id: Long
   + name: String
 }
 
 UserController --> UserService
-UserController --> AuthorizationService : "@PreAuthorize"
+UserManagementController --> UserService
+UserManagementController --> RoleService
 UserController --> UserDTO
 UserService --> UserRepository
 UserService --> RoleService
-UserService --> UserDTO
 RoleService --> RoleRepository
-RoleService --> RoleDTO
+RoleService --> UserRepository
 UserRepository --> User
 RoleRepository --> Role
 User --> Role

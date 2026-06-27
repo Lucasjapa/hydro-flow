@@ -68,6 +68,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-liquibase")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 
     // Remova as duas linhas do Jackson e deixe só essa
     implementation("com.fasterxml.jackson.core:jackson-databind")

@@ -58,6 +58,8 @@
             <column name="first_access" type="BOOLEAN" defaultValueBoolean="true">
                 <constraints nullable="false"/>
             </column>
+            <column name="password_reset_token" type="VARCHAR(255)"/>
+            <column name="password_reset_token_expires_at" type="TIMESTAMP"/>
         </createTable>
 
         <!-- Primary Key -->
@@ -419,6 +421,19 @@
             <column name="active" type="BOOLEAN" defaultValueBoolean="true">
                 <constraints nullable="false"/>
             </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20260627-02" author="Lucas Cavalcante">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hf_user" columnName="password_reset_token"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="hf_user">
+            <column name="password_reset_token" type="VARCHAR(255)"/>
+            <column name="password_reset_token_expires_at" type="TIMESTAMP"/>
         </addColumn>
     </changeSet>
 

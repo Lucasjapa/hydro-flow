@@ -1,6 +1,7 @@
 package br.com.project.hydroflow.domain;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,6 +32,12 @@ public class User implements UserDetails {
 
     @Column(name = "first_access", nullable = false)
     private boolean firstAccess = true;
+
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+
+    @Column(name = "password_reset_token_expires_at")
+    private LocalDateTime passwordResetTokenExpiresAt;
 
     public User() {}
 
@@ -100,6 +107,22 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
+
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
+
+    public LocalDateTime getPasswordResetTokenExpiresAt() {
+        return passwordResetTokenExpiresAt;
+    }
+
+    public void setPasswordResetTokenExpiresAt(LocalDateTime passwordResetTokenExpiresAt) {
+        this.passwordResetTokenExpiresAt = passwordResetTokenExpiresAt;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -111,6 +134,8 @@ public class User implements UserDetails {
         private String password;
         private Role role;
         private boolean firstAccess = true;
+        private String passwordResetToken;
+        private LocalDateTime passwordResetTokenExpiresAt;
 
         public Builder id(Long id) {
             this.id = id;
@@ -142,6 +167,16 @@ public class User implements UserDetails {
             return this;
         }
 
+        public Builder passwordResetToken(String passwordResetToken) {
+            this.passwordResetToken = passwordResetToken;
+            return this;
+        }
+
+        public Builder passwordResetTokenExpiresAt(LocalDateTime passwordResetTokenExpiresAt) {
+            this.passwordResetTokenExpiresAt = passwordResetTokenExpiresAt;
+            return this;
+        }
+
         public User build() {
             User user = new User();
             user.id = this.id;
@@ -150,6 +185,8 @@ public class User implements UserDetails {
             user.password = this.password;
             user.role = this.role;
             user.firstAccess = this.firstAccess;
+            user.passwordResetToken = this.passwordResetToken;
+            user.passwordResetTokenExpiresAt = this.passwordResetTokenExpiresAt;
             return user;
         }
     }

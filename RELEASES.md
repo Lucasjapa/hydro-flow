@@ -6,6 +6,48 @@ Documento derivado do histórico de commits (`git log`). As versões abaixo são
 
 ---
 
+## Release 1.2.0 — Recuperação de senha, famílias ativas e regras de gestão
+
+**Período:** 27 de junho de 2026  
+**Foco:** fluxo de reset de senha por e-mail, endurecimento de RBAC/usuários/cargos, flag `active` em famílias e validações de negócio.
+
+| Área | Resumo |
+|------|--------|
+| Autenticação | `POST /hf/auth/forgot-password`, `PATCH /hf/auth/reset-password`; token numérico de 6 dígitos com expiração de 1 h; `PasswordResetService`, `EmailService`, Spring Mail |
+| Banco (`hf_user`) | Colunas `password_reset_token`, `password_reset_token_expires_at` |
+| Banco (`hf_family`) | Coluna `active` (default `true`) |
+| Usuários | `PUT /hf/user-management/users/{id}/role` (`@AdminOrManageUsers`); `DELETE /hf/user-management/users/{id}` (`@AdminOnly`); validação de e-mail duplicado em `UserService.saveUser` |
+| Cargos | `RoleService.updateRole` bloqueia remoção de permissão `ADMIN` se for o único cargo com essa permissão |
+| Famílias | `PATCH /hf/families/{id}/activate` e `/deactivate` (`@AdminOrEditFamilyOrManageUsers`); `FamilyDTO.active`; job `updateAllCisternLevels` usa `findByActiveTrue()` |
+| Segurança | Rotas públicas: `/hf/auth/forgot-password`, `/hf/auth/reset-password` |
+| Config | `spring.mail.*` e `app.mail.from` em `application.yml`; dependência `spring-boot-starter-mail` |
+| Testes | `PasswordResetServiceTest`, casos em `AuthControllerWebMvcTest`, `UserServiceTest`, `RoleServiceTest`, `FamilyServiceTest`, `UserManagementControllerWebMvcTest`, `FamilyControllerWebMvcTest` |
+
+**Endpoints novos ou alterados**
+
+| Método | Rota | Autorização | Descrição |
+|--------|------|-------------|-----------|
+| `POST` | `/hf/auth/forgot-password` | Público | Solicita código por e-mail |
+| `PATCH` | `/hf/auth/reset-password` | Público | Redefine senha com token de 6 dígitos |
+| `PUT` | `/hf/user-management/users/{id}/role` | Admin ou `MANAGE_USERS` | Atualiza cargo do usuário |
+| `DELETE` | `/hf/user-management/users/{id}` | Admin | Remove usuário |
+| `PATCH` | `/hf/families/{id}/activate` | Admin, `EDIT_FAMILY` ou `MANAGE_USERS` | Ativa família |
+| `PATCH` | `/hf/families/{id}/deactivate` | Admin, `EDIT_FAMILY` ou `MANAGE_USERS` | Desativa família |
+
+**Destaques**
+
+- Recuperação de senha self-service com token curto numérico e envio por e-mail.
+- Famílias inativas permanecem no cadastro, mas saem do consumo diário automático.
+- Regras de integridade para último cargo admin e e-mail único no cadastro.
+
+### ⚠️ Breaking changes / contrato
+
+- **`FamilyDTO`:** novo campo `active` nas respostas de família.
+- **Cadastro de usuário:** e-mail já cadastrado retorna **422** (`IllegalStateException`).
+- **Atualização de cargo:** endpoint dedicado em user-management (não misturar com `PUT /hf/users/{id}`, que altera apenas nome/e-mail).
+
+---
+
 ## Release 1.1.0 — Gestão de acesso, Docker completo e endurecimento da API
 
 **Período:** 3 de maio – 5 de junho de 2026  
@@ -201,6 +243,7 @@ Documento derivado do histórico de commits (`git log`). As versões abaixo são
 | **0.5.0** | 30 mar – 18 abr 2026 | CORS + simplificação (**breaking**) + testes |
 | **1.0.0** | 19 abr 2026 | Perfis, permissões, primeiro acesso (**breaking**) |
 | **1.1.0** | 3 mai – 5 jun 2026 | Admin de acesso, Docker stack, senha/endurecimento (**breaking**) |
+| **1.2.0** | 27 jun 2026 | Reset de senha, famílias ativas, RBAC/usuários (**breaking parcial**) |
 
 ---
 

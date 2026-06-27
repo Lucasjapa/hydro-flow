@@ -3,11 +3,15 @@ package br.com.project.hydroflow.controller;
 import br.com.project.hydroflow.domain.User;
 import br.com.project.hydroflow.dto.ChangePasswordDTO;
 import br.com.project.hydroflow.dto.FirstAccessDTO;
+import br.com.project.hydroflow.dto.ForgotPasswordDTO;
 import br.com.project.hydroflow.dto.LoginDTO;
+import br.com.project.hydroflow.dto.MessageDTO;
+import br.com.project.hydroflow.dto.ResetPasswordDTO;
 import br.com.project.hydroflow.dto.TokenDTO;
 import br.com.project.hydroflow.repository.UserRepository;
 import br.com.project.hydroflow.security.JwtService;
 import br.com.project.hydroflow.security.annotation.AuthenticatedOnly;
+import br.com.project.hydroflow.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,16 +36,19 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetService passwordResetService;
 
     public AuthController(
             AuthenticationManager authenticationManager,
             JwtService jwtService,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            PasswordResetService passwordResetService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.passwordResetService = passwordResetService;
     }
 
     @PostMapping("/login")
@@ -78,6 +85,27 @@ public class AuthController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new TokenDTO(jwtService.generateToken(user)));
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Solicita recuperação de senha por e-mail")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Solicitação processada"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos")
+    })
+    public ResponseEntity<MessageDTO> forgotPassword(@RequestBody @Valid ForgotPasswordDTO forgotPasswordDTO) {
+        return ResponseEntity.ok(passwordResetService.requestPasswordReset(forgotPasswordDTO));
+    }
+
+    @PatchMapping("/reset-password")
+    @Operation(summary = "Redefine a senha usando o token enviado por e-mail")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Senha redefinida com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Token inválido ou expirado"),
+        @ApiResponse(responseCode = "422", description = "Dados inválidos")
+    })
+    public ResponseEntity<TokenDTO> resetPassword(@RequestBody @Valid ResetPasswordDTO resetPasswordDTO) {
+        return ResponseEntity.ok(passwordResetService.resetPassword(resetPasswordDTO));
     }
 
     @PatchMapping("/update-password")

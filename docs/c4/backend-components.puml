@@ -9,17 +9,20 @@ Person(user, "User", "Uses the backend API.")
 ContainerDb(postgres, "PostgreSQL", "PostgreSQL 15", "Relational database configured in application.yml and docker-compose.")
 
 Container_Boundary(backend_api, "Backend API") {
-    Component(authController, "AuthController", "REST Controller", "Handles login and first-access password change.")
-    Component(familyController, "FamilyController", "REST Controller", "Exposes family management and query endpoints.")
+    Component(authController, "AuthController", "REST Controller", "Handles login, password change, and password reset by e-mail.")
+    Component(userManagementController, "UserManagementController", "REST Controller", "Administrative user, role, and permission management.")
+    Component(familyController, "FamilyController", "REST Controller", "Exposes family management, activation, and query endpoints.")
     Component(systemSettingsController, "SystemSettingsController", "REST Controller", "Exposes system settings endpoints.")
     Component(userController, "UserController", "REST Controller", "Exposes user management endpoints.")
     Component(waterDeliveryController, "WaterDeliveryController", "REST Controller", "Exposes water delivery endpoints.")
 
     Component(authorizationService, "AuthorizationService", "Business Service", "Evaluates method-security ownership/admin rules.")
     Component(familyService, "FamilyService", "Business Service", "Manages families, cistern calculations, and daily consumption updates.")
-    Component(roleService, "RoleService", "Business Service", "Loads and manages roles.")
+    Component(userService, "UserService", "Business Service", "Creates, updates, and deletes users; validates unique e-mail.")
+    Component(passwordResetService, "PasswordResetService", "Business Service", "Generates 6-digit reset tokens and resets passwords.")
+    Component(emailService, "EmailService", "Infrastructure Component", "Sends password recovery e-mails via SMTP.")
+    Component(roleService, "RoleService", "Business Service", "Loads and manages roles; protects last ADMIN permission.")
     Component(systemSettingsService, "SystemSettingsService", "Business Service", "Loads and updates global system settings.")
-    Component(userService, "UserService", "Business Service", "Creates and updates users, passwords, and roles.")
     Component(waterDeliveryService, "WaterDeliveryService", "Business Service", "Registers deliveries and distributes water across cisterns.")
     Component(cisternScheduler, "CisternScheduler", "Scheduler Component", "Runs daily cistern level updates.")
 
@@ -36,6 +39,7 @@ Container_Boundary(backend_api, "Backend API") {
 }
 
 Rel(user, authController, "Authenticates", "HTTPS/JSON")
+Rel(user, userManagementController, "Manages access", "HTTPS/JSON")
 Rel(user, familyController, "Manages families", "HTTPS/JSON")
 Rel(user, systemSettingsController, "Manages settings", "HTTPS/JSON")
 Rel(user, userController, "Manages users", "HTTPS/JSON")
@@ -48,6 +52,13 @@ Rel(jwtAuthenticationFilter, userDetailsServiceImpl, "Loads users through")
 Rel(userDetailsServiceImpl, userRepository, "Reads users from")
 Rel(authController, jwtService, "Generates tokens with")
 Rel(authController, userRepository, "Reads and updates users with")
+Rel(authController, passwordResetService, "Requests password reset through")
+Rel(passwordResetService, userRepository, "Persists reset tokens with")
+Rel(passwordResetService, emailService, "Sends recovery e-mail through")
+Rel(passwordResetService, jwtService, "Generates tokens with")
+
+Rel(userManagementController, userService, "Calls")
+Rel(userManagementController, roleService, "Calls")
 
 Rel(familyController, familyService, "Calls")
 Rel(systemSettingsController, systemSettingsService, "Calls")

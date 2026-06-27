@@ -9,6 +9,8 @@ class FamilyController {
   - familyService: FamilyService
   + createFamily(familyDTO: FamilyDTO)
   + updateFamily(id: Long, familyDTO: FamilyDTO)
+  + activateFamily(id: Long)
+  + deactivateFamily(id: Long)
   + findFamilyById(id: Long)
   + findAllFamilies(...)
 }
@@ -18,9 +20,10 @@ class FamilyService {
   - systemSettingsService: SystemSettingsService
   + saveFamily(familyDTO: FamilyDTO)
   + updateFamily(id: Long, familyDTO: FamilyDTO)
+  + activateFamily(id: Long)
+  + deactivateFamily(id: Long)
   + findFamilyById(id: Long)
   + updateAllCisternLevels()
-  + calculateRemainingDays(cistern: Cistern, dailyConsumption: BigDecimal)
 }
 
 class SystemSettingsService {
@@ -30,6 +33,7 @@ class SystemSettingsService {
 interface FamilyRepository {
   + findById(id: Long)
   + findAll(pageable: Pageable)
+  + findByActiveTrue()
   + findByNameContainingIgnoreCase(name: String, pageable: Pageable)
   + findByFamilyStatus(status: FamilyStatus, pageable: Pageable)
   + save(family: Family)
@@ -43,6 +47,7 @@ class Family {
   - latitude: BigDecimal
   - longitude: BigDecimal
   - familyStatus: FamilyStatus
+  - active: boolean
   - members: List<Member>
   - cisterns: List<Cistern>
   + addMember(member: Member)
@@ -70,6 +75,7 @@ class FamilyDTO {
   + name: String
   + hasGutterSystem: Boolean
   + familyStatus: FamilyStatus
+  + active: Boolean
   + members: List<MemberDTO>
   + cisterns: List<CisternDTO>
   + dailyConsumption: BigDecimal

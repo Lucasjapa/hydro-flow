@@ -13,6 +13,7 @@ entity Family {
   latitude: BigDecimal
   longitude: BigDecimal
   familyStatus: FamilyStatus
+  active: boolean
 }
 
 entity Member {
@@ -45,6 +46,8 @@ entity User {
   email: String
   password: String
   firstAccess: boolean
+  passwordResetToken: String
+  passwordResetTokenExpiresAt: LocalDateTime
 }
 
 entity Role {

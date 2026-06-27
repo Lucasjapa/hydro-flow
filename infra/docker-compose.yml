@@ -13,6 +13,15 @@ services:
     networks:
       - hydro-flow-dev-net
 
+  mailhog:
+    container_name: hydro-flow-mailhog
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Interface Web
+    networks:
+      - hydro-flow-dev-net
+
 #  hydro-flow-front:
 #    image: 'hydro-flow-front:0.0.1'
 #    container_name: hydro-flow-front-dev

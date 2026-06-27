@@ -4,6 +4,27 @@ Texto pensado para **comunicação com stakeholders e equipes não desenvolvedor
 
 ---
 
+## [1.2.0] — 27 de junho de 2026
+
+### O que mudou para o usuário
+
+- **Recuperação de senha por e-mail:** quem esqueceu a senha pode solicitar um **código de 6 dígitos** enviado ao e-mail cadastrado e, em seguida, definir uma nova senha — sem precisar estar logado.
+- **Gestão de cargo do usuário:** administradores e gestores de usuários podem **alterar o cargo** de uma pessoa em endpoint dedicado (`/hf/user-management/users/{id}/role`).
+- **Remoção de usuário:** apenas **administradores** podem excluir contas pela API administrativa.
+- **Famílias ativas e inativas:** é possível **desativar ou reativar** uma família; famílias inativas **não entram** no cálculo automático diário de consumo de água das cisternas.
+- **Proteção do último administrador:** o sistema **impede remover a permissão ADMIN** de um cargo se ele for o **único** que a possui — evitando ficar sem nenhum perfil administrativo.
+- **E-mail único no cadastro:** não é mais possível **criar dois usuários com o mesmo e-mail**; a API retorna erro claro quando o endereço já está em uso.
+
+### Atenção (mudança que exige ação)
+
+- Telas de **“esqueci minha senha”** devem chamar `POST /hf/auth/forgot-password` e `PATCH /hf/auth/reset-password` (token numérico de 6 dígitos, válido por 1 hora).
+- **Alteração de cargo** saiu de fluxos genéricos de usuário e ficou em `/hf/user-management/users/{id}/role` (admin ou gestor de usuários).
+- **Ativar/desativar família** exige perfil admin, gestor de família ou gestor de usuários (`PATCH /hf/families/{id}/activate` e `/deactivate`).
+- Ambientes que usam recuperação de senha precisam de **servidor SMTP** configurado (`MAIL_*` no `.env` ou variáveis de ambiente).
+- Formulários de **cadastro de usuário** devem tratar resposta **422** quando o e-mail já existir.
+
+---
+
 ## [1.1.0] — 5 de junho de 2026
 
 ### O que mudou para o usuário

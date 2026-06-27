@@ -12,10 +12,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.com.project.hydroflow.domain.User;
 import br.com.project.hydroflow.dto.ChangePasswordDTO;
+import br.com.project.hydroflow.dto.ForgotPasswordDTO;
 import br.com.project.hydroflow.dto.LoginDTO;
+import br.com.project.hydroflow.dto.MessageDTO;
+import br.com.project.hydroflow.dto.ResetPasswordDTO;
+import br.com.project.hydroflow.dto.TokenDTO;
 import br.com.project.hydroflow.repository.UserRepository;
 import br.com.project.hydroflow.security.JwtService;
 import br.com.project.hydroflow.security.UserDetailsServiceImpl;
+import br.com.project.hydroflow.service.PasswordResetService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Field;
 import java.util.Optional;
@@ -54,6 +59,9 @@ class AuthControllerWebMvcTest {
 
     @MockitoBean
     private PasswordEncoder passwordEncoder;
+
+    @MockitoBean
+    private PasswordResetService passwordResetService;
 
     @MockitoBean
     private UserDetailsServiceImpl userDetailsService;
@@ -134,6 +142,45 @@ class AuthControllerWebMvcTest {
             when(jwtService.generateToken(any())).thenReturn("token123");
 
             mockMvc.perform(patch("/hf/auth/change-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(body)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.token").value("token123"));
+        }
+    }
+
+    @Nested
+    @DisplayName("forgotPassword")
+    class ForgotPassword {
+
+        @Test
+        @DisplayName("deve retornar 200 e mensagem genérica")
+        void testReturn200AndGenericMessage() throws Exception {
+            ForgotPasswordDTO body = new ForgotPasswordDTO("maria@example.com");
+            when(passwordResetService.requestPasswordReset(any(ForgotPasswordDTO.class)))
+                    .thenReturn(new MessageDTO("Se o e-mail estiver cadastrado, você receberá instruções para redefinir sua senha"));
+
+            mockMvc.perform(post("/hf/auth/forgot-password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(body)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message")
+                            .value("Se o e-mail estiver cadastrado, você receberá instruções para redefinir sua senha"));
+        }
+    }
+
+    @Nested
+    @DisplayName("resetPassword")
+    class ResetPassword {
+
+        @Test
+        @DisplayName("deve retornar 200 e TokenDTO quando token for válido")
+        void testReturn200AndTokenDtoWhenTokenIsValid() throws Exception {
+            ResetPasswordDTO body = new ResetPasswordDTO("123456", "novaSenha123");
+            when(passwordResetService.resetPassword(any(ResetPasswordDTO.class)))
+                    .thenReturn(new TokenDTO("token123"));
+
+            mockMvc.perform(patch("/hf/auth/reset-password")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(body)))
                     .andExpect(status().isOk())

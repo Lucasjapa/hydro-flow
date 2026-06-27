@@ -10,8 +10,26 @@ class AuthController {
   - jwtService: JwtService
   - userRepository: UserRepository
   - passwordEncoder: PasswordEncoder
+  - passwordResetService: PasswordResetService
   + login(loginDTO: LoginDTO)
   + changePassword(dto: ChangePasswordDTO)
+  + updatePassword(dto: ChangePasswordDTO)
+  + forgotPassword(dto: ForgotPasswordDTO)
+  + resetPassword(dto: ResetPasswordDTO)
+}
+
+class PasswordResetService {
+  - userRepository: UserRepository
+  - emailService: EmailService
+  - passwordEncoder: PasswordEncoder
+  - jwtService: JwtService
+  + requestPasswordReset(dto: ForgotPasswordDTO)
+  + resetPassword(dto: ResetPasswordDTO)
+}
+
+class EmailService {
+  - mailSender: JavaMailSender
+  + sendPasswordResetEmail(to: String, token: String)
 }
 
 class JwtAuthenticationFilter {
@@ -42,6 +60,7 @@ class SecurityConfig {
 interface UserDetailsService
 interface UserRepository {
   + findByEmail(email: String)
+  + findByPasswordResetToken(token: String)
   + findById(id: Long)
   + save(user: User)
 }
@@ -51,6 +70,8 @@ class User {
   - email: String
   - password: String
   - firstAccess: boolean
+  - passwordResetToken: String
+  - passwordResetTokenExpiresAt: LocalDateTime
   - role: Role
 }
 
@@ -66,7 +87,21 @@ class LoginDTO {
 
 class ChangePasswordDTO {
   + userId: Long
+  + currentPassword: String
   + newPassword: String
+}
+
+class ForgotPasswordDTO {
+  + email: String
+}
+
+class ResetPasswordDTO {
+  + token: String
+  + newPassword: String
+}
+
+class MessageDTO {
+  + message: String
 }
 
 class TokenDTO {
@@ -81,10 +116,17 @@ class FirstAccessDTO {
 UserDetailsServiceImpl ..|> UserDetailsService
 AuthController --> JwtService
 AuthController --> UserRepository
+AuthController --> PasswordResetService
 AuthController --> LoginDTO
 AuthController --> ChangePasswordDTO
+AuthController --> ForgotPasswordDTO
+AuthController --> ResetPasswordDTO
+AuthController --> MessageDTO
 AuthController --> TokenDTO
 AuthController --> FirstAccessDTO
+PasswordResetService --> UserRepository
+PasswordResetService --> EmailService
+PasswordResetService --> JwtService
 JwtAuthenticationFilter --> JwtService
 JwtAuthenticationFilter --> UserDetailsService
 UserDetailsServiceImpl --> UserRepository

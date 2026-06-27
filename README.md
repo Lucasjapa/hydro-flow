@@ -12,7 +12,8 @@ O Hydro Flow permite o gerenciamento de:
 - **Entregas de água** — registro de entregas com data e volume; atualização automática dos níveis das cisternas
 - **Status e previsões** — indicação de situação (normal, baixa, urgente), dias restantes de água e próxima entrega
 - **Configurações do sistema** — consumo diário de referência (mínimo 1 litro/dia)
-- **Usuários e acesso (RBAC)** — login JWT, perfis com permissões, gestão administrativa de cargos e troca de senha
+- **Usuários e acesso (RBAC)** — login JWT, perfis com permissões, gestão administrativa de cargos, troca de senha e **recuperação de senha por e-mail**
+- **Famílias ativas/inativas** — cadastro pode ser desativado sem exclusão; o consumo diário automático considera apenas famílias ativas
 
 Documentação de arquitetura (C4) em [`docs/c4/`](docs/c4/). Histórico de versões em [`CHANGELOG.md`](CHANGELOG.md) e [`RELEASES.md`](RELEASES.md).
 
@@ -83,6 +84,20 @@ http://localhost:8080/swagger-ui/index.html
 ```
 
 Relatórios gerados em `build/reports/tests/test/` e `build/reports/jacoco/test/html/`.
+
+### Recuperação de senha (e-mail)
+
+Configure as variáveis de ambiente de SMTP antes de usar `POST /hf/auth/forgot-password`:
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `MAIL_HOST` | Servidor SMTP | `localhost` |
+| `MAIL_PORT` | Porta SMTP | `1025` |
+| `MAIL_USERNAME` | Usuário SMTP | — |
+| `MAIL_PASSWORD` | Senha SMTP | — |
+| `MAIL_FROM` | Remetente | `noreply@hydroflow.com` |
+
+Em desenvolvimento local, [Mailpit](https://mailpit.axllent.org/) na porta 1025 captura os e-mails sem envio real.
 
 A CI (GitHub Actions) executa Spotless, build e testes com PostgreSQL 15 na porta **5433**.
 

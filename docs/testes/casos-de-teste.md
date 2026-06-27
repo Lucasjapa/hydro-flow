@@ -594,6 +594,35 @@ Módulo de Gestão de Usuários e Cargos
 
 <br/>
 
+21a. Bloqueio de Remoção da Permissão ADMIN do Único Cargo
+
+● ID do Caso de Teste: CT-068
+
+● Nome: Teste de Bloqueio de Remoção da Permissão ADMIN do Único Cargo
+
+● Objetivo: Garantir que o sistema impeça remover a permissão ADMIN de um cargo quando ele for o único que a possui.
+
+● Pré-condições: Existe apenas um cargo com permissão ADMIN no sistema.
+
+● Entradas:
+
+1. Cargo com permissão ADMIN
+2. Nova lista de permissões sem ADMIN
+
+● Passos para Execução:
+
+1. Acesse a edição desse cargo.
+2. Remova a permissão ADMIN.
+3. Salve as alterações.
+
+● Resultado Esperado: O sistema deve bloquear a operação e informar que não é possível remover a permissão ADMIN do único cargo que a possui.
+
+● Critérios de Sucesso: A permissão ADMIN permanece vinculada ao cargo.
+
+● Critérios de Falha: O cargo fica sem nenhum perfil administrativo no sistema.
+
+<br/>
+
 22. Exclusão Interna de Cargo Livre
 
 ● ID do Caso de Teste: CT-022
@@ -750,6 +779,174 @@ Módulo de Gestão de Usuários e Cargos
 ● Critérios de Sucesso: O cadastro finaliza e a pessoa passa a ter conta no sistema.
 
 ● Critérios de Falha: A rotina de segurança não criptografa a senha ou perde os dados.
+
+<br/>
+
+27a. Bloqueio de Cadastro com E-mail Duplicado
+
+● ID do Caso de Teste: CT-065
+
+● Nome: Teste de Bloqueio de Cadastro com E-mail Duplicado
+
+● Objetivo: Garantir que não seja possível cadastrar um novo usuário com e-mail já existente.
+
+● Pré-condições: Já existe um usuário com o e-mail informado.
+
+● Entradas:
+
+1. Nome, e-mail, senha e cargo de um novo usuário com e-mail repetido
+
+● Passos para Execução:
+
+1. Acesse a tela de criação de usuários.
+2. Preencha o formulário com um e-mail já cadastrado.
+3. Confirme o cadastro.
+
+● Resultado Esperado: O sistema deve rejeitar o cadastro informando que o e-mail já está em uso.
+
+● Critérios de Sucesso: Nenhum usuário duplicado é criado.
+
+● Critérios de Falha: Dois usuários ficam com o mesmo e-mail.
+
+<br/>
+
+27b. Atualização de Cargo do Usuário
+
+● ID do Caso de Teste: CT-066
+
+● Nome: Teste de Atualização de Cargo do Usuário
+
+● Objetivo: Garantir que administradores e gestores de usuários possam alterar o cargo de um usuário.
+
+● Pré-condições: O usuário autenticado possui permissão ADMIN ou MANAGE_USERS.
+
+● Entradas:
+
+1. Identificador do usuário
+2. Identificador do novo cargo
+
+● Passos para Execução:
+
+1. Acesse a gestão de usuários.
+2. Selecione o usuário desejado.
+3. Altere o cargo e confirme.
+
+● Resultado Esperado: O cargo do usuário deve ser atualizado com sucesso.
+
+● Critérios de Sucesso: O perfil passa a refletir o novo cargo.
+
+● Critérios de Falha: O cargo permanece inalterado ou a operação é negada indevidamente.
+
+<br/>
+
+27c. Exclusão de Usuário por Administrador
+
+● ID do Caso de Teste: CT-067
+
+● Nome: Teste de Exclusão de Usuário por Administrador
+
+● Objetivo: Garantir que apenas administradores possam remover um usuário do sistema.
+
+● Pré-condições: O usuário autenticado possui permissão ADMIN.
+
+● Entradas:
+
+1. Identificador do usuário a ser removido
+
+● Passos para Execução:
+
+1. Acesse a gestão administrativa de usuários.
+2. Solicite a exclusão do usuário.
+
+● Resultado Esperado: O usuário deve ser removido permanentemente do sistema.
+
+● Critérios de Sucesso: A conta deixa de existir na listagem.
+
+● Critérios de Falha: Usuários sem perfil admin conseguem excluir contas ou a exclusão falha silenciosamente.
+
+<br/>
+
+27d. Recuperação de Senha por E-mail
+
+● ID do Caso de Teste: CT-062
+
+● Nome: Teste de Recuperação de Senha por E-mail
+
+● Objetivo: Garantir que o usuário possa solicitar um código de recuperação de senha pelo e-mail cadastrado.
+
+● Pré-condições: O e-mail informado pertence a um usuário cadastrado e o servidor de e-mail está configurado.
+
+● Entradas:
+
+1. E-mail do usuário
+
+● Passos para Execução:
+
+1. Acesse a opção "Esqueci minha senha".
+2. Informe o e-mail cadastrado.
+3. Confirme a solicitação.
+
+● Resultado Esperado: O sistema deve enviar um código numérico de 6 dígitos por e-mail e exibir mensagem genérica de confirmação.
+
+● Critérios de Sucesso: O e-mail é recebido com o código; a mensagem não revela se o e-mail existe ou não.
+
+● Critérios de Falha: Nenhum código é gerado ou o e-mail não é enviado.
+
+<br/>
+
+27e. Redefinição de Senha com Token Válido
+
+● ID do Caso de Teste: CT-063
+
+● Nome: Teste de Redefinição de Senha com Token Válido
+
+● Objetivo: Garantir que o usuário consiga definir uma nova senha usando o código recebido por e-mail.
+
+● Pré-condições: O usuário possui um código de 6 dígitos válido e não expirado.
+
+● Entradas:
+
+1. Código de recuperação
+2. Nova senha
+
+● Passos para Execução:
+
+1. Acesse a tela de redefinição de senha.
+2. Informe o código recebido por e-mail.
+3. Defina a nova senha e confirme.
+
+● Resultado Esperado: A senha deve ser alterada e o usuário receber um token de acesso.
+
+● Critérios de Sucesso: O login com a nova senha funciona; o código não pode ser reutilizado.
+
+● Critérios de Falha: A senha antiga continua válida ou o código é aceito após expirar.
+
+<br/>
+
+27f. Rejeição de Token Inválido ou Expirado
+
+● ID do Caso de Teste: CT-064
+
+● Nome: Teste de Rejeição de Token Inválido ou Expirado
+
+● Objetivo: Garantir que códigos incorretos ou expirados não permitam redefinir a senha.
+
+● Pré-condições: O código informado é inválido ou já passou de 1 hora.
+
+● Entradas:
+
+1. Código incorreto ou expirado
+2. Nova senha
+
+● Passos para Execução:
+
+1. Tente redefinir a senha com o código inválido.
+
+● Resultado Esperado: O sistema deve rejeitar a operação informando que o token é inválido ou expirado.
+
+● Critérios de Sucesso: A senha não é alterada.
+
+● Critérios de Falha: A senha é alterada com código inválido.
 
 <br/>
 
@@ -1230,6 +1427,86 @@ Módulo de Gestão de Famílias
 ● Critérios de Sucesso: A rotina noturna abate a água corretamente sem pular nenhuma casa.
 
 ● Critérios de Falha: Algumas casas continuam com a água intacta apesar do consumo.
+
+<br/>
+
+45a. Consumo Diário Ignora Famílias Inativas
+
+● ID do Caso de Teste: CT-071
+
+● Nome: Teste de Consumo Diário Ignora Famílias Inativas
+
+● Objetivo: Garantir que famílias desativadas não tenham o nível da cisterna reduzido pelo job diário.
+
+● Pré-condições: Existe uma família marcada como inativa com água na cisterna.
+
+● Entradas:
+
+1. Família com `active = false`
+
+● Passos para Execução:
+
+1. Execute a rotina diária de consumo de água.
+
+● Resultado Esperado: O nível da cisterna da família inativa deve permanecer inalterado.
+
+● Critérios de Sucesso: Apenas famílias ativas sofrem dedução diária.
+
+● Critérios de Falha: Famílias inativas perdem água automaticamente.
+
+<br/>
+
+45b. Ativação de Família
+
+● ID do Caso de Teste: CT-069
+
+● Nome: Teste de Ativação de Família
+
+● Objetivo: Garantir que perfis autorizados possam reativar uma família desativada.
+
+● Pré-condições: A família está inativa e o usuário possui permissão ADMIN, EDIT_FAMILY ou MANAGE_USERS.
+
+● Entradas:
+
+1. Identificador da família
+
+● Passos para Execução:
+
+1. Acesse a gestão de famílias.
+2. Solicite a ativação da família.
+
+● Resultado Esperado: A família deve passar a constar como ativa (`active = true`).
+
+● Critérios de Sucesso: A família volta a participar do consumo diário automático.
+
+● Critérios de Falha: A família permanece inativa ou usuários sem permissão conseguem ativar.
+
+<br/>
+
+45c. Desativação de Família
+
+● ID do Caso de Teste: CT-070
+
+● Nome: Teste de Desativação de Família
+
+● Objetivo: Garantir que perfis autorizados possam desativar uma família sem excluí-la.
+
+● Pré-condições: A família está ativa e o usuário possui permissão ADMIN, EDIT_FAMILY ou MANAGE_USERS.
+
+● Entradas:
+
+1. Identificador da família
+
+● Passos para Execução:
+
+1. Acesse a gestão de famílias.
+2. Solicite a desativação da família.
+
+● Resultado Esperado: A família deve passar a constar como inativa (`active = false`).
+
+● Critérios de Sucesso: O cadastro permanece no sistema, mas deixa de ser processado pelo job diário.
+
+● Critérios de Falha: A família é excluída ou usuários sem permissão conseguem desativar.
 
 <br/>
 
