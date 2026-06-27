@@ -7,6 +7,7 @@ import br.com.project.hydroflow.dto.RoleDTO;
 import br.com.project.hydroflow.repository.PermissionRepository;
 import br.com.project.hydroflow.repository.RoleRepository;
 import br.com.project.hydroflow.repository.UserRepository;
+import br.com.project.hydroflow.security.Permissions;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.List;
@@ -64,10 +65,19 @@ public class RoleService {
         role.setName(roleDTO.name());
 
         if (roleDTO.permissions() != null) {
-            role.getPermissions().clear();
-            if (!roleDTO.permissions().isEmpty()) {
-                role.getPermissions().addAll(resolvePermissions(roleDTO.permissions()));
+            boolean hadAdmin = role.getPermissions().stream()
+                    .anyMatch(permission -> Permissions.ADMIN.equals(permission.getName()));
+            Set<Permission> newPermissions =
+                    roleDTO.permissions().isEmpty() ? Set.of() : resolvePermissions(roleDTO.permissions());
+            boolean willHaveAdmin = newPermissions.stream()
+                    .anyMatch(permission -> Permissions.ADMIN.equals(permission.getName()));
+
+            if (hadAdmin && !willHaveAdmin) {
+                validateNotLastAdminRole(role.getId());
             }
+
+            role.getPermissions().clear();
+            role.getPermissions().addAll(newPermissions);
         }
 
         RoleDTO roleUpdated = RoleDTO.from(roleRepository.save(role));
@@ -86,6 +96,13 @@ public class RoleService {
 
         roleRepository.delete(role);
         log.info("Cargo deletado com sucesso. id: {}", id);
+    }
+
+    private void validateNotLastAdminRole(Long roleId) {
+        if (roleRepository.countByPermissions_Name(Permissions.ADMIN) <= 1) {
+            log.warn("Não é possível remover permissão ADMIN do único cargo que a possui. id: {}", roleId);
+            throw new IllegalStateException("Não é possível remover a permissão Administrador do único cargo que a possui");
+        }
     }
 
     private Set<Permission> resolvePermissions(List<PermissionDTO> permissionDTOs) {

@@ -3,6 +3,7 @@ package br.com.project.hydroflow.service;
 import br.com.project.hydroflow.domain.Role;
 import br.com.project.hydroflow.domain.User;
 import br.com.project.hydroflow.dto.UpdateUserDTO;
+import br.com.project.hydroflow.dto.UpdateUserRoleDTO;
 import br.com.project.hydroflow.dto.UserDTO;
 import br.com.project.hydroflow.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -52,6 +53,21 @@ public class UserService {
 
         UserDTO userUpdated = UserDTO.from(userRepository.save(user));
         log.info("Usuário atualizado com sucesso. id: {}", id);
+        return userUpdated;
+    }
+
+    public UserDTO updateUserRole(Long id, UpdateUserRoleDTO updateUserRoleDTO) {
+        log.info("Atualizando cargo do usuário. id: {}, roleId: {}", id, updateUserRoleDTO.roleId());
+        User user = userRepository.findById(id).orElseThrow(() -> {
+            log.warn("Usuário não encontrado para atualização de cargo. id: {}", id);
+            return new EntityNotFoundException("Usuário não encontrado: " + id);
+        });
+
+        Role role = roleService.findById(updateUserRoleDTO.roleId());
+        user.setRole(role);
+
+        UserDTO userUpdated = UserDTO.from(userRepository.save(user));
+        log.info("Cargo do usuário atualizado com sucesso. id: {}", id);
         return userUpdated;
     }
 }

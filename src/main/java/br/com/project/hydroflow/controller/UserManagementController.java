@@ -2,6 +2,7 @@ package br.com.project.hydroflow.controller;
 
 import br.com.project.hydroflow.dto.PermissionDTO;
 import br.com.project.hydroflow.dto.RoleDTO;
+import br.com.project.hydroflow.dto.UpdateUserRoleDTO;
 import br.com.project.hydroflow.dto.UserDTO;
 import br.com.project.hydroflow.security.annotation.AdminOnly;
 import br.com.project.hydroflow.security.annotation.AdminOrManageUsers;
@@ -48,6 +49,22 @@ public class UserManagementController {
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")})
     public ResponseEntity<List<UserDTO>> findAllUsers() {
         return ResponseEntity.ok(userService.findAllUsers());
+    }
+
+    @PutMapping("/users/{id}/role")
+    @AdminOrManageUsers
+    @Operation(summary = "Atualiza o cargo de um usuário")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Cargo atualizado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "403", description = "Sem permissão para atualizar cargo"),
+        @ApiResponse(responseCode = "404", description = "Usuário ou cargo não encontrado"),
+        @ApiResponse(responseCode = "422", description = "Erro de regra de negócio")
+    })
+    public ResponseEntity<UserDTO> updateUserRole(
+            @Parameter(description = "ID do usuário", example = "1") @PathVariable Long id,
+            @RequestBody @Valid UpdateUserRoleDTO updateUserRoleDTO) {
+        return ResponseEntity.ok(userService.updateUserRole(id, updateUserRoleDTO));
     }
 
     @GetMapping("/roles")

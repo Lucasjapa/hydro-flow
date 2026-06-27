@@ -11,6 +11,7 @@ import br.com.project.hydroflow.dto.RoleDTO;
 import br.com.project.hydroflow.repository.PermissionRepository;
 import br.com.project.hydroflow.repository.RoleRepository;
 import br.com.project.hydroflow.repository.UserRepository;
+import br.com.project.hydroflow.security.Permissions;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -138,6 +139,57 @@ class RoleServiceTest {
 
             assertNotNull(result);
             assertEquals("ADMIN", result.name());
+        }
+
+        @Test
+        @DisplayName("deve lancar excecao ao remover ADMIN do unico cargo que a possui")
+        void testThrowExceptionWhenRemovingAdminFromLastRole() {
+            Permission adminPermission = new Permission();
+            ReflectionTestUtils.setField(adminPermission, "id", 1L);
+            ReflectionTestUtils.setField(adminPermission, "name", Permissions.ADMIN);
+            ReflectionTestUtils.setField(adminPermission, "label", "Admin");
+
+            Role role = new Role("ADMIN");
+            ReflectionTestUtils.setField(role, "id", 1L);
+            role.getPermissions().add(adminPermission);
+            when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+            when(roleRepository.countByPermissions_Name(Permissions.ADMIN)).thenReturn(1L);
+
+            PermissionDTO readPermission = new PermissionDTO(2L, "READ", "Read");
+            RoleDTO roleDTO = new RoleDTO(1L, "ADMIN", List.of(readPermission));
+
+            assertThrows(IllegalStateException.class, () -> roleService.updateRole(1L, roleDTO));
+            verify(roleRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("deve permitir remover ADMIN quando outro cargo tambem possui a permissao")
+        void testAllowRemovingAdminWhenAnotherRoleHasIt() {
+            Permission adminPermission = new Permission();
+            ReflectionTestUtils.setField(adminPermission, "id", 1L);
+            ReflectionTestUtils.setField(adminPermission, "name", Permissions.ADMIN);
+            ReflectionTestUtils.setField(adminPermission, "label", "Admin");
+
+            Role role = new Role("ADMIN");
+            ReflectionTestUtils.setField(role, "id", 1L);
+            role.getPermissions().add(adminPermission);
+            when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
+            when(roleRepository.countByPermissions_Name(Permissions.ADMIN)).thenReturn(2L);
+
+            PermissionDTO readPermission = new PermissionDTO(2L, "READ", "Read");
+            RoleDTO roleDTO = new RoleDTO(1L, "OPERADOR", List.of(readPermission));
+
+            Permission readPerm = new Permission();
+            ReflectionTestUtils.setField(readPerm, "id", 2L);
+            ReflectionTestUtils.setField(readPerm, "name", "READ");
+            ReflectionTestUtils.setField(readPerm, "label", "Read");
+            when(permissionRepository.findAllById(List.of(2L))).thenReturn(List.of(readPerm));
+            when(roleRepository.save(any(Role.class))).thenReturn(role);
+
+            RoleDTO result = roleService.updateRole(1L, roleDTO);
+
+            assertNotNull(result);
+            verify(roleRepository, times(1)).save(role);
         }
     }
 

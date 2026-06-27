@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.com.project.hydroflow.dto.PermissionDTO;
 import br.com.project.hydroflow.dto.RoleDTO;
+import br.com.project.hydroflow.dto.UpdateUserRoleDTO;
 import br.com.project.hydroflow.dto.UserDTO;
 import br.com.project.hydroflow.security.JwtService;
 import br.com.project.hydroflow.security.UserDetailsServiceImpl;
@@ -68,6 +69,25 @@ class UserManagementControllerWebMvcTest {
             mockMvc.perform(get("/hf/user-management"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].name").value("Admin"));
+        }
+    }
+
+    @Nested
+    @DisplayName("updateUserRole")
+    class UpdateUserRole {
+        @Test
+        @DisplayName("deve atualizar cargo do usuário")
+        void testUpdateUserRole() throws Exception {
+            UpdateUserRoleDTO request = new UpdateUserRoleDTO(2L);
+            UserDTO response = new UserDTO(1L, "Usuario", "usuario@teste.com", null, 2L);
+
+            when(userService.updateUserRole(eq(1L), any(UpdateUserRoleDTO.class))).thenReturn(response);
+
+            mockMvc.perform(put("/hf/user-management/users/1/role")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.roleId").value(2L));
         }
     }
 

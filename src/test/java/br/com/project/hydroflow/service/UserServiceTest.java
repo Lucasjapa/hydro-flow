@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import br.com.project.hydroflow.domain.Role;
 import br.com.project.hydroflow.domain.User;
 import br.com.project.hydroflow.dto.UpdateUserDTO;
+import br.com.project.hydroflow.dto.UpdateUserRoleDTO;
 import br.com.project.hydroflow.dto.UserDTO;
 import br.com.project.hydroflow.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -149,6 +150,49 @@ class UserServiceTest {
             when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> userService.updateUser(99L, input))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("99");
+        }
+    }
+
+    @Nested
+    @DisplayName("updateUserRole")
+    class UpdateUserRole {
+
+        @Test
+        @DisplayName("deve atualizar cargo do usuário")
+        void testUpdateUserRole() {
+            Role newRole = new Role("ADMIN");
+            newRole.setId(2L);
+            UpdateUserRoleDTO input = new UpdateUserRoleDTO(2L);
+
+            when(userRepository.findById(1L)).thenReturn(Optional.of(defaultUser));
+            when(roleService.findById(2L)).thenReturn(newRole);
+            when(userRepository.save(defaultUser)).thenReturn(defaultUser);
+
+            UserDTO result = userService.updateUserRole(1L, input);
+
+            assertThat(result.roleId()).isEqualTo(2L);
+            assertThat(defaultUser.getRole()).isSameAs(newRole);
+        }
+
+        @Test
+        @DisplayName("deve lançar EntityNotFoundException quando usuário não existir")
+        void testThrowEntityNotFoundExceptionWhenUserDoesNotExist() {
+            when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> userService.updateUserRole(99L, new UpdateUserRoleDTO(2L)))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("99");
+        }
+
+        @Test
+        @DisplayName("deve lançar EntityNotFoundException quando cargo não existir")
+        void testThrowEntityNotFoundExceptionWhenRoleDoesNotExist() {
+            when(userRepository.findById(1L)).thenReturn(Optional.of(defaultUser));
+            when(roleService.findById(99L)).thenThrow(new EntityNotFoundException("Cargo não encontrado: 99"));
+
+            assertThatThrownBy(() -> userService.updateUserRole(1L, new UpdateUserRoleDTO(99L)))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("99");
         }
