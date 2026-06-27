@@ -208,6 +208,9 @@
             <column name="family_status" type="VARCHAR(10)" defaultValue="NORMAL">
                 <constraints nullable="false"/>
             </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
 
         <!-- Primary Key -->
@@ -403,6 +406,20 @@
         </update>
 
         <addNotNullConstraint tableName="hf_permission" columnName="label" columnDataType="VARCHAR(100)"/>
+    </changeSet>
+
+    <changeSet id="20260627-01" author="Lucas Cavalcante">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hf_family" columnName="active"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="hf_family">
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

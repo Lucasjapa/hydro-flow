@@ -92,6 +92,18 @@ class UserManagementControllerWebMvcTest {
     }
 
     @Nested
+    @DisplayName("deleteUser")
+    class DeleteUser {
+        @Test
+        @DisplayName("deve remover usuário")
+        void testDeleteUser() throws Exception {
+            doNothing().when(userService).deleteUser(1L);
+
+            mockMvc.perform(delete("/hf/user-management/users/1")).andExpect(status().isNoContent());
+        }
+    }
+
+    @Nested
     @DisplayName("findAllRoles")
     class FindAllRoles {
         @Test

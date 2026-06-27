@@ -15,6 +15,8 @@ public interface FamilyRepository extends JpaRepository<Family, Long> {
 
     List<Family> findByHasGutterSystemTrue();
 
+    List<Family> findByActiveTrue();
+
     Page<Family> findByFamilyStatus(Family.FamilyStatus status, Pageable pageable);
 
     @Query("SELECT f FROM Family f JOIN f.cisterns c GROUP BY f ORDER BY SUM(c.currentLevelLiters) ASC")

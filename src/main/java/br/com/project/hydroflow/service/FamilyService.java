@@ -94,6 +94,24 @@ public class FamilyService {
         return familyUpdated;
     }
 
+    public FamilyDTO activateFamily(Long id) {
+        log.info("Ativando família com id: {}", id);
+        Family family = getFamilyById(id);
+        family.setActive(true);
+        FamilyDTO familyActivated = FamilyDTO.from(familyRepository.save(family));
+        log.info("Família ativada com sucesso. id: {}", id);
+        return familyActivated;
+    }
+
+    public FamilyDTO deactivateFamily(Long id) {
+        log.info("Desativando família com id: {}", id);
+        Family family = getFamilyById(id);
+        family.setActive(false);
+        FamilyDTO familyDeactivated = FamilyDTO.from(familyRepository.save(family));
+        log.info("Família desativada com sucesso. id: {}", id);
+        return familyDeactivated;
+    }
+
     public FamilyDTO findFamilyById(Long id) {
         Family family = getFamilyById(id);
 
@@ -146,7 +164,7 @@ public class FamilyService {
 
         SystemSettings settings = systemSettingsService.getSystemSettings();
 
-        List<Family> families = familyRepository.findAll();
+        List<Family> families = familyRepository.findByActiveTrue();
 
         families.forEach(family -> {
             BigDecimal dailyConsumption = settings.getDailyWaterConsumption()

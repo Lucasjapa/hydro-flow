@@ -138,6 +138,7 @@ class FamilyServiceTest {
                     BigDecimal.valueOf(-8),
                     BigDecimal.valueOf(-36),
                     Family.FamilyStatus.NORMAL,
+                    true,
                     List.of(new MemberDTO(null, "Ana", 32, false)),
                     List.of(new CisternDTO(null, new BigDecimal("5000"), new BigDecimal("2000"))),
                     null,
@@ -174,6 +175,7 @@ class FamilyServiceTest {
                     BigDecimal.ONE,
                     BigDecimal.TEN,
                     Family.FamilyStatus.NORMAL,
+                    true,
                     List.of(new MemberDTO(null, "Novo", 10, false)),
                     List.of(new CisternDTO(null, new BigDecimal("2000"), new BigDecimal("500"))),
                     null,
@@ -205,6 +207,63 @@ class FamilyServiceTest {
             when(familyRepository.findById(404L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> familyService.updateFamily(404L, input))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("404");
+        }
+    }
+
+    @Nested
+    @DisplayName("activateFamily")
+    class ActivateFamily {
+
+        @Test
+        @DisplayName("deve ativar família")
+        void testActivateFamily() {
+            defaultFamily.setActive(false);
+            when(familyRepository.findById(1L)).thenReturn(Optional.of(defaultFamily));
+            when(familyRepository.save(defaultFamily)).thenReturn(defaultFamily);
+
+            FamilyDTO result = familyService.activateFamily(1L);
+
+            assertThat(defaultFamily.isActive()).isTrue();
+            assertThat(result.active()).isTrue();
+            verify(familyRepository).save(defaultFamily);
+        }
+
+        @Test
+        @DisplayName("deve lançar EntityNotFoundException quando id não existir")
+        void testThrowEntityNotFoundExceptionWhenIdDoesNotExist() {
+            when(familyRepository.findById(404L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> familyService.activateFamily(404L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("404");
+        }
+    }
+
+    @Nested
+    @DisplayName("deactivateFamily")
+    class DeactivateFamily {
+
+        @Test
+        @DisplayName("deve desativar família")
+        void testDeactivateFamily() {
+            when(familyRepository.findById(1L)).thenReturn(Optional.of(defaultFamily));
+            when(familyRepository.save(defaultFamily)).thenReturn(defaultFamily);
+
+            FamilyDTO result = familyService.deactivateFamily(1L);
+
+            assertThat(defaultFamily.isActive()).isFalse();
+            assertThat(result.active()).isFalse();
+            verify(familyRepository).save(defaultFamily);
+        }
+
+        @Test
+        @DisplayName("deve lançar EntityNotFoundException quando id não existir")
+        void testThrowEntityNotFoundExceptionWhenIdDoesNotExist() {
+            when(familyRepository.findById(404L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> familyService.deactivateFamily(404L))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("404");
         }
@@ -309,7 +368,7 @@ class FamilyServiceTest {
         @DisplayName("deve consumir água das cisternas conforme consumo diário e persistir famílias")
         void testConsumeWaterFromCisternsAndPersistFamilies() {
             when(systemSettingsService.getSystemSettings()).thenReturn(systemSettings);
-            when(familyRepository.findAll()).thenReturn(List.of(defaultFamily));
+            when(familyRepository.findByActiveTrue()).thenReturn(List.of(defaultFamily));
 
             BigDecimal nivelInicial = defaultFamily.getCisterns().getFirst().getCurrentLevelLiters();
 

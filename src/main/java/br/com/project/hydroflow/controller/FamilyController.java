@@ -2,6 +2,7 @@ package br.com.project.hydroflow.controller;
 
 import br.com.project.hydroflow.domain.Family;
 import br.com.project.hydroflow.dto.FamilyDTO;
+import br.com.project.hydroflow.security.annotation.AdminOrEditFamilyOrManageUsers;
 import br.com.project.hydroflow.security.annotation.AdminOrManageUsers;
 import br.com.project.hydroflow.security.annotation.AuthenticatedOnly;
 import br.com.project.hydroflow.service.FamilyService;
@@ -68,6 +69,32 @@ public class FamilyController {
     })
     public ResponseEntity<FamilyDTO> updateFamily(@PathVariable Long id, @RequestBody @Valid FamilyDTO familyDTO) {
         return ResponseEntity.ok(familyService.updateFamily(id, familyDTO));
+    }
+
+    @PatchMapping("/{id}/activate")
+    @AdminOrEditFamilyOrManageUsers
+    @Operation(summary = "Ativa uma família")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Família ativada com sucesso"),
+        @ApiResponse(responseCode = "403", description = "Sem permissão para ativar família"),
+        @ApiResponse(responseCode = "404", description = "Família não encontrada")
+    })
+    public ResponseEntity<FamilyDTO> activateFamily(
+            @Parameter(description = "ID da família", example = "1") @PathVariable Long id) {
+        return ResponseEntity.ok(familyService.activateFamily(id));
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @AdminOrEditFamilyOrManageUsers
+    @Operation(summary = "Desativa uma família")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Família desativada com sucesso"),
+        @ApiResponse(responseCode = "403", description = "Sem permissão para desativar família"),
+        @ApiResponse(responseCode = "404", description = "Família não encontrada")
+    })
+    public ResponseEntity<FamilyDTO> deactivateFamily(
+            @Parameter(description = "ID da família", example = "1") @PathVariable Long id) {
+        return ResponseEntity.ok(familyService.deactivateFamily(id));
     }
 
     @Operation(summary = "Buscar família por ID")

@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -67,6 +68,7 @@ class FamilyControllerWebMvcTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     FamilyStatus.NORMAL,
+                    true,
                     members,
                     cisterns,
                     null,
@@ -79,6 +81,7 @@ class FamilyControllerWebMvcTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     FamilyStatus.NORMAL,
+                    true,
                     members,
                     cisterns,
                     null,
@@ -112,6 +115,7 @@ class FamilyControllerWebMvcTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     FamilyStatus.NORMAL,
+                    true,
                     members,
                     cisterns,
                     null,
@@ -142,6 +146,7 @@ class FamilyControllerWebMvcTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     FamilyStatus.NORMAL,
+                    true,
                     List.of(),
                     List.of(),
                     null,
@@ -170,6 +175,7 @@ class FamilyControllerWebMvcTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     FamilyStatus.NORMAL,
+                    true,
                     List.of(),
                     List.of(),
                     null,
@@ -199,6 +205,7 @@ class FamilyControllerWebMvcTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     FamilyStatus.NORMAL,
+                    true,
                     List.of(),
                     List.of(),
                     null,
@@ -229,6 +236,7 @@ class FamilyControllerWebMvcTest {
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
                     FamilyStatus.URGENT,
+                    true,
                     List.of(),
                     List.of(),
                     null,
@@ -242,6 +250,64 @@ class FamilyControllerWebMvcTest {
             mockMvc.perform(get("/hf/families").param("status", "URGENT"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content[0].familyStatus").value("URGENT"));
+        }
+    }
+
+    @Nested
+    @DisplayName("activateFamily")
+    class ActivateFamily {
+
+        @Test
+        @DisplayName("deve ativar uma família")
+        void testActivateFamily() throws Exception {
+            FamilyDTO response = new FamilyDTO(
+                    1L,
+                    "Familia Teste",
+                    true,
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    FamilyStatus.NORMAL,
+                    true,
+                    List.of(),
+                    List.of(),
+                    null,
+                    null,
+                    null);
+
+            when(familyService.activateFamily(1L)).thenReturn(response);
+
+            mockMvc.perform(patch("/hf/families/1/activate"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.active").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("deactivateFamily")
+    class DeactivateFamily {
+
+        @Test
+        @DisplayName("deve desativar uma família")
+        void testDeactivateFamily() throws Exception {
+            FamilyDTO response = new FamilyDTO(
+                    1L,
+                    "Familia Teste",
+                    true,
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    FamilyStatus.NORMAL,
+                    false,
+                    List.of(),
+                    List.of(),
+                    null,
+                    null,
+                    null);
+
+            when(familyService.deactivateFamily(1L)).thenReturn(response);
+
+            mockMvc.perform(patch("/hf/families/1/deactivate"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.active").value(false));
         }
     }
 }

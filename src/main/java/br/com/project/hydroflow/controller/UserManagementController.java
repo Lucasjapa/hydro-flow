@@ -6,6 +6,7 @@ import br.com.project.hydroflow.dto.UpdateUserRoleDTO;
 import br.com.project.hydroflow.dto.UserDTO;
 import br.com.project.hydroflow.security.annotation.AdminOnly;
 import br.com.project.hydroflow.security.annotation.AdminOrManageUsers;
+import br.com.project.hydroflow.security.annotation.AuthenticatedOnly;
 import br.com.project.hydroflow.service.PermissionService;
 import br.com.project.hydroflow.service.RoleService;
 import br.com.project.hydroflow.service.UserService;
@@ -23,7 +24,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/hf/user-management")
-@AdminOnly
+@AuthenticatedOnly
 @Tag(name = "Gerenciamento de Usuários", description = "Operações administrativas de usuários")
 @ApiResponses({
     @ApiResponse(responseCode = "401", description = "Não autenticado"),
@@ -65,6 +66,19 @@ public class UserManagementController {
             @Parameter(description = "ID do usuário", example = "1") @PathVariable Long id,
             @RequestBody @Valid UpdateUserRoleDTO updateUserRoleDTO) {
         return ResponseEntity.ok(userService.updateUserRole(id, updateUserRoleDTO));
+    }
+
+    @DeleteMapping("/users/{id}")
+    @AdminOnly
+    @Operation(summary = "Remove um usuário")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Usuário removido com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
+    public ResponseEntity<Void> deleteUser(
+            @Parameter(description = "ID do usuário", example = "1") @PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/roles")

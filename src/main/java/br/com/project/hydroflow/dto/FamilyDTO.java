@@ -30,6 +30,9 @@ public record FamilyDTO(
         @Schema(description = "Status da família", example = "NORMAL")
         Family.FamilyStatus familyStatus,
 
+        @Schema(description = "Indica se a família está ativa", example = "true")
+        Boolean active,
+
         @NotNull @Size(min = 1) List<MemberDTO> members,
 
         @NotNull @Size(min = 1) List<CisternDTO> cisterns,
@@ -51,6 +54,7 @@ public record FamilyDTO(
                 family.getLatitude(),
                 family.getLongitude(),
                 family.getFamilyStatus(),
+                family.isActive(),
                 family.getMembers().stream().map(MemberDTO::from).toList(),
                 family.getCisterns().stream().map(CisternDTO::from).toList(),
                 null,
@@ -68,6 +72,7 @@ public record FamilyDTO(
                 family.getLatitude(),
                 family.getLongitude(),
                 family.getFamilyStatus(),
+                family.isActive(),
                 family.getMembers().stream().map(MemberDTO::from).toList(),
                 family.getCisterns().stream().map(CisternDTO::from).toList(),
                 dailyConsumption,

@@ -3,6 +3,8 @@ package br.com.project.hydroflow.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import br.com.project.hydroflow.domain.Role;
@@ -95,6 +97,7 @@ class UserServiceTest {
         @DisplayName("deve persistir usuário")
         void testSaveUser() {
             UserDTO input = new UserDTO(null, "Maria", "maria@example.com", "senha1234", 1L);
+            when(userRepository.existsByEmail("maria@example.com")).thenReturn(false);
             when(roleService.findById(1L)).thenReturn(defaultRole);
             when(passwordEncoder.encode("senha1234")).thenReturn("hash-senha");
 
@@ -114,6 +117,19 @@ class UserServiceTest {
             assertThat(result.email()).isEqualTo("maria@example.com");
             assertThat(result.password()).isNull();
             assertThat(result.roleId()).isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("deve lançar IllegalStateException quando e-mail já estiver cadastrado")
+        void testThrowIllegalStateExceptionWhenEmailAlreadyExists() {
+            UserDTO input = new UserDTO(null, "Maria", "maria@example.com", "senha1234", 1L);
+            when(userRepository.existsByEmail("maria@example.com")).thenReturn(true);
+
+            assertThatThrownBy(() -> userService.saveUser(input))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("E-mail já cadastrado");
+
+            verify(userRepository, never()).save(any(User.class));
         }
     }
 
@@ -193,6 +209,31 @@ class UserServiceTest {
             when(roleService.findById(99L)).thenThrow(new EntityNotFoundException("Cargo não encontrado: 99"));
 
             assertThatThrownBy(() -> userService.updateUserRole(1L, new UpdateUserRoleDTO(99L)))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("99");
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteUser")
+    class DeleteUser {
+
+        @Test
+        @DisplayName("deve deletar usuário")
+        void testDeleteUser() {
+            when(userRepository.findById(2L)).thenReturn(Optional.of(secondUser));
+
+            userService.deleteUser(2L);
+
+            verify(userRepository).delete(secondUser);
+        }
+
+        @Test
+        @DisplayName("deve lançar EntityNotFoundException quando id não existir")
+        void testThrowEntityNotFoundExceptionWhenIdDoesNotExist() {
+            when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> userService.deleteUser(99L))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("99");
         }

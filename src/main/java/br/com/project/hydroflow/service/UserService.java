@@ -35,6 +35,12 @@ public class UserService {
 
     public UserDTO saveUser(UserDTO userDTO) {
         log.info("Criando usuário: {}", userDTO.email());
+
+        if (userRepository.existsByEmail(userDTO.email())) {
+            log.warn("E-mail já cadastrado: {}", userDTO.email());
+            throw new IllegalStateException("E-mail já cadastrado");
+        }
+
         Role role = roleService.findById(userDTO.roleId());
         User user = new User(userDTO.name(), userDTO.email(), passwordEncoder.encode(userDTO.password()), role);
         UserDTO userCreated = UserDTO.from(userRepository.save(user));
@@ -69,5 +75,16 @@ public class UserService {
         UserDTO userUpdated = UserDTO.from(userRepository.save(user));
         log.info("Cargo do usuário atualizado com sucesso. id: {}", id);
         return userUpdated;
+    }
+
+    public void deleteUser(Long id) {
+        log.info("Deletando usuário com id: {}", id);
+        User user = userRepository.findById(id).orElseThrow(() -> {
+            log.warn("Usuário não encontrado para exclusão. id: {}", id);
+            return new EntityNotFoundException("Usuário não encontrado: " + id);
+        });
+
+        userRepository.delete(user);
+        log.info("Usuário deletado com sucesso. id: {}", id);
     }
 }

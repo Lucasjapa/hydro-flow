@@ -30,6 +30,9 @@ public class Family {
     @Column(name = "family_status", nullable = false)
     private FamilyStatus familyStatus = FamilyStatus.NORMAL;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     @OneToMany(mappedBy = "family", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> members = new ArrayList<>();
 
@@ -98,6 +101,14 @@ public class Family {
         this.familyStatus = familyStatus;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public List<Member> getMembers() {
         return members;
     }
@@ -137,6 +148,7 @@ public class Family {
         private BigDecimal latitude;
         private BigDecimal longitude;
         private FamilyStatus familyStatus = FamilyStatus.NORMAL;
+        private boolean active = true;
         private List<Member> members = new ArrayList<>();
         private List<WaterDelivery> waterDeliveries = new ArrayList<>();
         private List<Cistern> cisterns = new ArrayList<>();
@@ -171,6 +183,11 @@ public class Family {
             return this;
         }
 
+        public Builder active(boolean active) {
+            this.active = active;
+            return this;
+        }
+
         public Builder members(List<Member> members) {
             this.members = members;
             return this;
@@ -194,6 +211,7 @@ public class Family {
             family.latitude = this.latitude;
             family.longitude = this.longitude;
             family.familyStatus = this.familyStatus;
+            family.active = this.active;
             family.members = this.members;
             family.waterDeliveries = this.waterDeliveries;
             family.cisterns = this.cisterns;
