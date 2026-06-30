@@ -22,37 +22,37 @@ services:
     networks:
       - hydro-flow-dev-net
 
-#  hydro-flow-front:
-#    image: 'hydro-flow-front:0.0.1'
-#    container_name: hydro-flow-front-dev
-#    depends_on:
-#      - hydro-flow
-#    ports:
-#      - '80:80'
-#    volumes:
-#      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-#
-#    networks:
-#      - hydro-flow-dev-net  # mesma rede do hydro-flow
-#
-#  hydro-flow:
-#    depends_on:
-#      - postgres
-#    container_name: hydro-flow-dev
-#    image: 'hydro-flow:0.0.1-SNAPSHOT'
-#    ports:
-#      - '8080:8080'
-#      - '5007:5007'
-#    environment:
-#      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5007
-#    env_file:
-#      - env/hydro-flow.env
-#    volumes:
-#      - ./data/hydro-flow:/opt/hydro-flow/data
-#      - ./logs/hydro-flow:/app/logs
-#
-#    networks:
-#      - hydro-flow-dev-net
+  hydro-flow-front:
+    image: 'hydro-flow-front:0.0.1'
+    container_name: hydro-flow-front-dev
+    depends_on:
+      - hydro-flow
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+    networks:
+      - hydro-flow-dev-net  # mesma rede do hydro-flow
+
+  hydro-flow:
+    depends_on:
+      - postgres
+    container_name: hydro-flow-dev
+    image: 'hydro-flow:0.0.1-SNAPSHOT'
+    ports:
+      - '8080:8080'
+      - '5007:5007'
+    environment:
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5007
+    env_file:
+      - env/hydro-flow.env
+    volumes:
+      - ./data/hydro-flow:/opt/hydro-flow/data
+      - ./logs/hydro-flow:/app/logs
+
+    networks:
+      - hydro-flow-dev-net
 
 networks:
   hydro-flow-dev-net:
